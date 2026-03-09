@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
@@ -119,6 +120,10 @@
 
 @theme inline {
   --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-editorial: 'Libre Baskerville', Georgia, serif;
+  --font-micro: 'DM Sans', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -155,6 +160,16 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Portfolio custom colors */
+  --color-void: hsl(var(--bg-void));
+  --color-surface: hsl(var(--bg-surface));
+  --color-surface-border: hsl(var(--bg-border));
+  --color-surface-hover: hsl(var(--bg-hover));
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-ghost: hsl(var(--text-ghost));
+  --color-signal: hsl(var(--accent-signal));
+  --color-signal-dim: hsl(var(--accent-dim));
 }
 
 html,
@@ -343,5 +358,210 @@ a {
   body {
     background-color: var(--background);
     color: var(--foreground);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PORTFOLIO DESIGN SYSTEM (from digital-craft-chronicle)
+   ═══════════════════════════════════════════════════ */
+
+/* Portfolio theme variables – SWISS BRUTALISM × AEROSPACE PRECISION */
+.portfolio-theme {
+  --bg-void: 0 0% 3.1%;
+  --bg-surface: 0 0% 5.5%;
+  --bg-border: 0 0% 10.2%;
+  --bg-hover: 0 0% 7.8%;
+
+  --text-primary: 40 20% 92%;
+  --text-secondary: 0 0% 42%;
+  --text-ghost: 0 0% 18%;
+
+  --accent-signal: 68 100% 64%;
+  --accent-dim: 68 60% 15%;
+  --accent-glow: 68 100% 64%;
+
+  /* Override shadcn tokens for portfolio */
+  --background: var(--bg-void);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-signal);
+  --primary-foreground: 0 0% 3.1%;
+  --secondary: var(--bg-surface);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-surface);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--bg-hover);
+  --accent-foreground: var(--text-primary);
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: var(--bg-border);
+  --input: var(--bg-border);
+  --ring: var(--accent-signal);
+  --radius: 0.25rem;
+}
+
+/* Portfolio body overrides when in portfolio mode */
+.portfolio-theme {
+  background-color: hsl(var(--bg-void));
+  color: hsl(var(--text-primary));
+  font-family: 'Libre Baskerville', Georgia, serif;
+  line-height: 1.72;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for portfolio */
+.portfolio-theme ::-webkit-scrollbar {
+  width: 2px;
+}
+.portfolio-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.portfolio-theme ::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent-signal));
+  border-radius: 0;
+}
+
+/* Selection for portfolio */
+.portfolio-theme ::selection {
+  background: hsl(var(--accent-signal) / 0.2);
+  color: hsl(var(--text-primary));
+}
+
+/* ── Typography classes ── */
+.font-display {
+  font-family: 'Bebas Neue', sans-serif;
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.font-mono-data {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+.font-mono-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.font-editorial {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  line-height: 1.72;
+}
+
+.font-micro {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+/* ── Component classes ── */
+.accent-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: hsl(var(--accent-signal));
+  box-shadow: 0 0 12px hsl(var(--accent-signal) / 0.4);
+}
+
+.section-ghost-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(120px, 20vw, 300px);
+  color: hsl(var(--text-ghost));
+  line-height: 0.8;
+  user-select: none;
+  pointer-events: none;
+}
+
+.glass-surface {
+  background: hsl(var(--bg-surface) / 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--bg-border));
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+}
+
+.project-card-hover {
+  transition: border-color 0.3s ease;
+}
+.project-card-hover:hover {
+  border-color: hsl(var(--accent-signal) / 0.3);
+}
+
+.content-width {
+  max-width: 64ch;
+}
+
+.skill-node {
+  border: 1px solid hsl(var(--bg-border));
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+.skill-node:hover {
+  border-color: hsl(var(--accent-signal) / 0.5);
+  background: hsl(var(--accent-signal) / 0.04);
+}
+
+.timeline-line {
+  background: hsl(var(--bg-border));
+  height: 1px;
+}
+
+.resume-panel {
+  background: hsl(0 0% 96%);
+  color: hsl(0 0% 8%);
+}
+
+/* ── Portfolio animations ── */
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-theme * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Restore cursor on touch */
+@media (pointer: coarse) {
+  .portfolio-theme {
+    cursor: auto;
   }
 }

@@ -1,0 +1,47 @@
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+const sectionNames: Record<string, string> = {
+  hero: "HOME",
+  about: "ABOUT",
+  work: "WORK",
+  timeline: "TIMELINE",
+  resume: "RESUME",
+  blog: "BLOG",
+  contact: "CONTACT",
+};
+
+const sectionNumbers: Record<string, string> = {
+  hero: "001",
+  about: "002",
+  work: "003",
+  timeline: "004",
+  resume: "005",
+  blog: "006",
+  contact: "007",
+};
+
+const SectionCounter = ({ activeSection }: { activeSection: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (containerRef.current) {
+      gsap.fromTo(
+        containerRef.current,
+        { opacity: 0, y: -5 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  }, { dependencies: [activeSection] });
+
+  return (
+    <div className="fixed right-8 top-8 z-[80] hidden md:block" ref={containerRef}>
+      <div className="font-mono text-xs tracking-[0.15em] text-text-ghost">
+        [{sectionNumbers[activeSection] || "001"} / {sectionNames[activeSection] || "HOME"}]
+      </div>
+    </div>
+  );
+};
+
+export default SectionCounter;
