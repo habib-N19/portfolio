@@ -94,7 +94,6 @@ const BlogSection = () => {
             data-cursor="link"
             onMouseEnter={() => setHoveredId(post.id)}
             onMouseLeave={() => setHoveredId(null)}
-            onClick={(e) => e.preventDefault()}
           >
             <span className="font-mono-data text-text-secondary transition-colors duration-300 group-hover:text-primary">
               [{post.number}]

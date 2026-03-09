@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -7,6 +7,25 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ContactSection = () => {
   const containerRef = useRef<HTMLElement>(null);
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZoneName: "short"
+        })
+      );
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useGSAP(() => {
     const elements = gsap.utils.toArray(".contact-reveal");
@@ -31,7 +50,7 @@ const ContactSection = () => {
     <section id="contact" ref={containerRef} className="relative flex min-h-screen flex-col justify-center px-6 py-32 md:px-12 lg:px-20">
       {/* Ghost number */}
       <div className="section-ghost-number absolute right-4 top-8 md:right-12">
-        006
+        008
       </div>
 
       <div className="grid gap-16 lg:grid-cols-2">
@@ -113,11 +132,16 @@ const ContactSection = () => {
 
       {/* Footer */}
       <footer className="contact-reveal mt-32 flex flex-wrap items-center justify-between gap-4 border-t border-surface-border pt-8">
+        <div className="flex gap-8">
+          <span className="font-mono-data text-text-ghost">
+            © {new Date().getFullYear()} YOUR NAME
+          </span>
+          <span className="font-mono-data text-text-ghost">
+            LOCAL TIME: {time}
+          </span>
+        </div>
         <span className="font-mono-data text-text-ghost">
-          © 2026 YOUR NAME
-        </span>
-        <span className="font-mono-data text-text-ghost">
-          v1.0
+          SPEC v1.0
         </span>
       </footer>
     </section>

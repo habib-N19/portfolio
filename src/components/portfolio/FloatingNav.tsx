@@ -7,6 +7,7 @@ const sections = [
   { id: "about",    icon: "≡", label: "ABOUT"   },
   { id: "work",     icon: "▣", label: "WORK"    },
   { id: "timeline", icon: "⊶", label: "TIME"    },
+  { id: "github",   icon: "⌥", label: "GITHUB"  },
   { id: "resume",   icon: "↗", label: "RESUME"  },
   { id: "blog",     icon: "✎", label: "BLOG"    },
   { id: "contact",  icon: "✉", label: "CONTACT" },

@@ -18,6 +18,7 @@ export default function SmoothScroll({
       touchMultiplier: 2,
     })
     lenisRef.current = lenis
+    ;(window as any).lenis = lenis
 
     // 2. Sync Lenis with GSAP Ticker
     gsap.ticker.add((time) => {
@@ -33,6 +34,7 @@ export default function SmoothScroll({
         lenis.raf(time * 1000)
       })
       lenis.destroy()
+      delete (window as any).lenis
     }
   }, [])
 

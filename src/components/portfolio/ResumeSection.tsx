@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -52,11 +52,30 @@ const ResumeSection = () => {
     }
   }, { dependencies: [panelOpen], scope: containerRef });
 
+  // Lock scroll when panel is open — disable ScrollTrigger to prevent background movement
+  useEffect(() => {
+    if (panelOpen) {
+      document.body.style.overflow = "hidden";
+      // Disable all ScrollTrigger instances to prevent background scroll
+      ScrollTrigger.getAll().forEach((t) => t.disable(false));
+    } else {
+      document.body.style.overflow = "";
+      // Re-enable all ScrollTrigger instances
+      ScrollTrigger.getAll().forEach((t) => t.enable());
+    }
+    return () => {
+      // Cleanup: ensure ScrollTriggers are re-enabled if component unmounts while open
+      if (panelOpen) {
+        ScrollTrigger.getAll().forEach((t) => t.enable());
+      }
+    };
+  }, [panelOpen]);
+
   return (
     <section id="resume" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20">
       {/* Ghost number */}
       <div className="section-ghost-number absolute right-4 top-8 md:right-12">
-        005
+        006
       </div>
 
       <h2 className="resume-reveal font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
@@ -137,13 +156,23 @@ const ResumeSection = () => {
           />
           <div
             className="resume-modal-panel resume-panel fixed inset-4 z-[96] overflow-y-auto rounded-sm bg-white p-8 md:inset-12 md:p-16"
+            style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
+            data-lenis-prevent="true"
           >
-            <button
-               onClick={handleClose}
-               className="font-mono-label mb-8 text-neutral-500 transition-colors hover:text-neutral-900"
-             >
-                 ← CLOSE
-               </button>
+            <div className="flex items-center justify-between mb-8 mx-auto max-w-2xl">
+              <button
+                onClick={handleClose}
+                className="font-mono-label text-neutral-500 transition-colors hover:text-neutral-900"
+              >
+                  ← CLOSE
+              </button>
+              <button
+                onClick={() => window.open("/resume.pdf", "_blank")}
+                className="font-mono-label text-primary transition-colors hover:text-black"
+              >
+                  ↓ DOWNLOAD PDF
+              </button>
+            </div>
  
                <div className="mx-auto max-w-2xl">
                  <h1 className="font-display text-5xl text-black uppercase tracking-tight">{resumeData.name}</h1>

@@ -13,6 +13,7 @@ export interface Project {
   liveUrl?: string;
   githubUrl?: string;
   color: string;
+  media?: { type: "image" | "video"; url: string; caption?: string }[];
 }
 
 export const projects: Project[] = [
@@ -31,6 +32,10 @@ export const projects: Project[] = [
     liveUrl: "#",
     githubUrl: "#",
     color: "68 100% 64%",
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600&q=80", caption: "Physics-based primitive interactions" },
+      { type: "image", url: "https://images.unsplash.com/photo-1618761714954-0b8cd0026356?w=1600&q=80", caption: "Token system documentation" }
+    ]
   },
   {
     id: "void-renderer",
@@ -47,6 +52,10 @@ export const projects: Project[] = [
     liveUrl: "#",
     githubUrl: "#",
     color: "280 60% 50%",
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1600&q=80", caption: "Live performance at XYZ Festival" },
+      { type: "image", url: "https://images.unsplash.com/photo-1614729939124-032f0b56c9ce?w=1600&q=80", caption: "Generative noise patterns based on low-end frequencies" }
+    ]
   },
   {
     id: "delta-sync",
@@ -62,6 +71,10 @@ export const projects: Project[] = [
     featured: false,
     githubUrl: "#",
     color: "200 80% 50%",
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=80", caption: "Real-time cursor syncing demonstration window" },
+      { type: "image", url: "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?w=1600&q=80", caption: "Data node replication model visualization" }
+    ]
   },
   {
     id: "terra-map",
@@ -78,6 +91,10 @@ export const projects: Project[] = [
     liveUrl: "#",
     githubUrl: "#",
     color: "150 60% 40%",
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1600&q=80", caption: "Global heat mapping in 3D" },
+      { type: "image", url: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=1600&q=80", caption: "Data layer inspector tools" }
+    ]
   },
   {
     id: "mono-cms",
@@ -93,5 +110,9 @@ export const projects: Project[] = [
     featured: false,
     githubUrl: "#",
     color: "40 80% 55%",
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1600&q=80", caption: "Admin content modeling dashboard" },
+      { type: "image", url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1600&q=80", caption: "API response visualization" }
+    ]
   },
 ];

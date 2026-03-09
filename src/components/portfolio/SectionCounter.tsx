@@ -7,6 +7,7 @@ const sectionNames: Record<string, string> = {
   about: "ABOUT",
   work: "WORK",
   timeline: "TIMELINE",
+  github: "ACTIVITY",
   resume: "RESUME",
   blog: "BLOG",
   contact: "CONTACT",
@@ -17,9 +18,10 @@ const sectionNumbers: Record<string, string> = {
   about: "002",
   work: "003",
   timeline: "004",
-  resume: "005",
-  blog: "006",
-  contact: "007",
+  github: "005",
+  resume: "006",
+  blog: "007",
+  contact: "008",
 };
 
 const SectionCounter = ({ activeSection }: { activeSection: string }) => {

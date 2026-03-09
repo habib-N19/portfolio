@@ -4,6 +4,17 @@ import SmoothScroll from "#/components/portfolio/SmoothScroll";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 
 export const Route = createFileRoute("/blog/$slug")({
+  head: ({ params }) => {
+    const formatTitle = (s: string) => s.replace(/-/g, " ").toUpperCase();
+    return {
+      meta: [
+        { title: `${formatTitle(params.slug)} | Habiboulaye` },
+        { name: 'description', content: `Read the article ${formatTitle(params.slug)} on Habiboulaye's portfolio.` },
+        { property: 'og:title', content: formatTitle(params.slug) },
+        { property: 'og:type', content: 'article' },
+      ]
+    };
+  },
   component: BlogPostRoute,
 });
 

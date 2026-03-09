@@ -376,13 +376,12 @@ a {
   color: hsl(var(--text-primary));
   font-family: 'Libre Baskerville', Georgia, serif;
   line-height: 1.72;
-  cursor: none;
   overflow-x: hidden;
 }
 
 /* Custom scrollbar for portfolio */
 .portfolio-theme ::-webkit-scrollbar {
-  width: 2px;
+  width: 8px;
 }
 .portfolio-theme ::-webkit-scrollbar-track {
   background: transparent;
@@ -396,6 +395,12 @@ a {
 .portfolio-theme ::selection {
   background: hsl(var(--accent-signal) / 0.2);
   color: hsl(var(--text-primary));
+}
+
+/* Selection for resume light panel */
+.resume-panel ::selection {
+  background: hsl(var(--accent-signal) / 0.4);
+  color: black;
 }
 
 /* ── Typography classes ── */

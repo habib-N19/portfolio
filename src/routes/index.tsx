@@ -9,6 +9,7 @@ import HeroSection from '#/components/portfolio/HeroSection'
 import AboutSection from '#/components/portfolio/AboutSection'
 import WorkSection from '#/components/portfolio/WorkSection'
 import TimelineSection from '#/components/portfolio/TimelineSection'
+import GitHubSection from '#/components/portfolio/GitHubSection'
 import ResumeSection from '#/components/portfolio/ResumeSection'
 import BlogSection from '#/components/portfolio/BlogSection'
 import ContactSection from '#/components/portfolio/ContactSection'
@@ -17,7 +18,7 @@ import WebGLBackground from '#/components/portfolio/WebGLBackground'
 
 export const Route = createFileRoute('/')({ component: PortfolioPage })
 
-const sections = ['hero', 'about', 'work', 'timeline', 'resume', 'blog', 'contact']
+const sections = ['hero', 'about', 'work', 'timeline', 'github', 'resume', 'blog', 'contact']
 
 function PortfolioPage() {
   const [loading, setLoading] = useState(true)
@@ -76,6 +77,7 @@ function PortfolioPage() {
             <AboutSection />
             <WorkSection />
             <TimelineSection />
+            <GitHubSection />
             <ResumeSection />
             <BlogSection />
             <ContactSection />

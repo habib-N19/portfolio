@@ -55,7 +55,7 @@ function BlogIndexRoute() {
                 key={post.id}
                 to="/blog/$slug"
                 params={{ slug: post.id }}
-                className="group relative grid grid-cols-1 gap-2 border-b border-surface-border py-6 transition-colors duration-300 hover:bg-surface-hover md:grid-cols-[60px_1fr_160px_80px] md:items-center md:gap-4 block"
+                className="group relative grid grid-cols-1 gap-2 border-b border-surface-border py-6 transition-colors duration-300 hover:bg-surface-hover md:grid-cols-[60px_1fr_160px_80px] md:items-center md:gap-4"
                 data-cursor="link"
               >
                 <span className="font-mono-data text-text-secondary transition-colors duration-300 group-hover:text-primary">
