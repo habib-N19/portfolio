@@ -1,10 +1,10 @@
 import { useRef, useMemo } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
 function BackgroundParticles() {
   const particlesRef = useRef<THREE.Points>(null)
-  const { clock } = useThree()
+  const elapsedRef = useRef(0)
 
   // Generate dense, slow particles
   const [positions, basePositions, speeds] = useMemo(() => {
@@ -37,6 +37,7 @@ function BackgroundParticles() {
 
     // Cap delta to prevent massive jumps if framedrops occur during scroll end
     const safeDelta = Math.min(delta, 0.05);
+    elapsedRef.current += safeDelta;
     const lerpFactor = 0.1; // Use a fixed lerp factor instead of time-based exponential to ensure deterministic smoothing when wheel stops
 
     for (let i = 0; i < positionsAttr.count; i++) {
@@ -72,7 +73,7 @@ function BackgroundParticles() {
     positionsAttr.needsUpdate = true
 
     particlesRef.current.rotation.y += safeDelta * 0.02
-    particlesRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.1) * 0.05
+    particlesRef.current.rotation.x = Math.sin(elapsedRef.current * 0.1) * 0.05
   })
 
   return (
@@ -95,7 +96,7 @@ function BackgroundParticles() {
 
 function ForegroundParticles() {
   const particlesRef = useRef<THREE.Points>(null)
-  const { clock } = useThree()
+  const elapsedRef = useRef(0)
 
   // Generate sparse, fast, larger particles
   const [positions, basePositions, speeds] = useMemo(() => {
@@ -128,6 +129,8 @@ function ForegroundParticles() {
 
     // Cap delta to prevent massive jumps if framedrops occur
     const safeDelta = Math.min(delta, 0.05);
+    elapsedRef.current += safeDelta;
+    const lerpFactor = 0.1;
 
     for (let i = 0; i < positionsAttr.count; i++) {
       const idxX = i * 3
@@ -164,7 +167,7 @@ function ForegroundParticles() {
     
     // Counter-rotate slightly
     particlesRef.current.rotation.y -= safeDelta * 0.03
-    particlesRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.3) * 0.08
+    particlesRef.current.rotation.x = Math.sin(elapsedRef.current * 0.3) * 0.08
   })
 
   return (

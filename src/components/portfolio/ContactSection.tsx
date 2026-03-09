@@ -5,8 +5,8 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ContactSection = () => {
-  const containerRef = useRef<HTMLElement>(null);
+/** Isolated clock component — only this re-renders every second */
+const LiveClock = () => {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -26,6 +26,12 @@ const ContactSection = () => {
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  return <>{time}</>;
+};
+
+const ContactSection = () => {
+  const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
     const elements = gsap.utils.toArray(".contact-reveal");
@@ -49,7 +55,7 @@ const ContactSection = () => {
   return (
     <section id="contact" ref={containerRef} className="relative flex min-h-screen flex-col justify-center px-6 py-32 md:px-12 lg:px-20">
       {/* Ghost number */}
-      <div className="section-ghost-number absolute right-4 top-8 md:right-12">
+      <div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
         008
       </div>
 
@@ -136,8 +142,8 @@ const ContactSection = () => {
           <span className="font-mono-data text-text-ghost">
             © {new Date().getFullYear()} YOUR NAME
           </span>
-          <span className="font-mono-data text-text-ghost">
-            LOCAL TIME: {time}
+          <span className="font-mono-data text-text-ghost" suppressHydrationWarning>
+            LOCAL TIME: <LiveClock />
           </span>
         </div>
         <span className="font-mono-data text-text-ghost">
@@ -149,3 +155,4 @@ const ContactSection = () => {
 };
 
 export default ContactSection;
+

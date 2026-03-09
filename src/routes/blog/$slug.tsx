@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 import SmoothScroll from "#/components/portfolio/SmoothScroll";
 import { getPost } from "#/lib/blog.functions";
@@ -66,7 +66,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function BlogPostRoute() {
 	const post = Route.useLoaderData();
-	const [scrollProgress, setScrollProgress] = useState(0);
+	const progressBarRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -75,7 +75,9 @@ function BlogPostRoute() {
 				document.documentElement.scrollHeight -
 				document.documentElement.clientHeight;
 			const scroll = (totalScroll / windowHeight) * 100;
-			setScrollProgress(scroll);
+			if (progressBarRef.current) {
+				progressBarRef.current.style.width = `${scroll}%`;
+			}
 		};
 
 		window.addEventListener("scroll", handleScroll, { passive: true });
@@ -90,8 +92,9 @@ function BlogPostRoute() {
 				{/* Reading Progress Bar */}
 				<div className="fixed top-0 left-0 w-full h-[3px] z-50 bg-background">
 					<div
+						ref={progressBarRef}
 						className="h-full bg-primary transition-all duration-150 ease-out"
-						style={{ width: `${scrollProgress}%` }}
+						style={{ width: "0%" }}
 					/>
 				</div>
 

@@ -123,7 +123,7 @@ const WorkSection = () => {
     <>
       <section id="work" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20 overflow-hidden">
         {/* Ghost number */}
-        <div className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50">
+        <div className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50" aria-hidden="true">
           003
         </div>
 

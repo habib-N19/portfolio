@@ -456,6 +456,12 @@ a {
   pointer-events: none;
 }
 
+/* Skip layout/paint for off-screen sections */
+.portfolio-theme section[id] {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 100vh;
+}
+
 .glass-surface {
   background: hsl(var(--bg-surface) / 0.85);
   backdrop-filter: blur(12px);

@@ -84,7 +84,7 @@ const ResumeSection = () => {
   return (
     <section id="resume" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20">
       {/* Ghost number */}
-      <div className="section-ghost-number absolute right-4 top-8 md:right-12">
+      <div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
         006
       </div>
 

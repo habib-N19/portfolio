@@ -6,7 +6,6 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
-
 import PostHogProvider from '../integrations/posthog/provider'
 
 import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
@@ -27,10 +26,26 @@ import { Link } from '@tanstack/react-router'
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
+const PERSON_JSONLD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      name: 'Habiboulaye',
+      url: 'https://habiboulaye.dev',
+      jobTitle: 'Creative Developer',
+      sameAs: [],
+    },
+    {
+      '@type': 'WebSite',
+      name: 'Habiboulaye',
+      url: 'https://habiboulaye.dev',
+    },
+  ],
+})
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async () => {
-    // Other redirect strategies are possible; see
-    // https://github.com/TanStack/router/tree/main/examples/react/i18n-paraglide#offline-redirect
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('lang', getLocale())
     }
@@ -66,17 +81,44 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         property: 'og:url',
-        content: 'https://yourportfolio.domain',
+        content: 'https://habiboulaye.dev',
       },
       {
         property: 'og:image',
-        content: 'https://yourportfolio.domain/og-image.jpg',
+        content: 'https://habiboulaye.dev/og-image.jpg',
+      },
+      // Twitter Card
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:title',
+        content: 'Habiboulaye - Creative Developer',
+      },
+      {
+        name: 'twitter:description',
+        content: 'Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.',
+      },
+      {
+        name: 'twitter:image',
+        content: 'https://habiboulaye.dev/og-image.jpg',
       },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'canonical',
+        href: 'https://habiboulaye.dev',
+      },
+    ],
+    scripts: [
+      {
+        type: 'application/ld+json',
+        children: PERSON_JSONLD,
       },
     ],
   }),
@@ -108,18 +150,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <PostHogProvider>
           <TanStackQueryProvider>
             {children}
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                TanStackQueryDevtools,
-              ]}
-            />
+            {import.meta.env.DEV && (
+              <TanStackDevtools
+                config={{
+                  position: 'bottom-right',
+                }}
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                  TanStackQueryDevtools,
+                ]}
+              />
+            )}
           </TanStackQueryProvider>
         </PostHogProvider>
         <Scripts />
@@ -127,3 +171,4 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   )
 }
+

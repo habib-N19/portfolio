@@ -24,18 +24,15 @@ export default function SmoothScroll({
     ;(window as any).lenis = lenis
 
     // 2. Sync Lenis with GSAP Ticker using the official recommended pattern
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000)
-    })
+    const rafCallback = (time: number) => lenis.raf(time * 1000)
+    gsap.ticker.add(rafCallback)
 
     // 3. Disable GSAP's lag smoothing to prevent fighting with Lenis smooth scroll
     gsap.ticker.lagSmoothing(0)
 
     return () => {
       // 4. Clean up
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000)
-      })
+      gsap.ticker.remove(rafCallback)
       lenis.destroy()
       delete (window as any).lenis
     }

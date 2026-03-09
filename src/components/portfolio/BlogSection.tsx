@@ -94,7 +94,7 @@ const BlogSection = () => {
 			onMouseMove={handleMouseMove}
 		>
 			{/* Ghost number */}
-			<div className="section-ghost-number absolute right-4 top-8 md:right-12">
+			<div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
 				007
 			</div>
 

@@ -59,12 +59,13 @@ const HeroSection = () => {
   return (
     <section id="hero" ref={containerRef} className="relative flex min-h-screen flex-col justify-end px-6 pb-16 md:px-12 lg:px-20">
       {/* Ghost number */}
-      <div className="section-ghost-number absolute right-4 top-8 md:right-12">
+      <div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
         001
       </div>
 
       <div className="mb-16 md:mb-24">
         {/* Display lines */}
+        <h1>
         <div className="overflow-hidden">
           <SplitText 
             text="BUILDING" 
@@ -83,6 +84,7 @@ const HeroSection = () => {
             className="hero-line font-display text-[clamp(60px,15vw,220px)] leading-[0.92] text-foreground" 
           />
         </div>
+        </h1>
 
         {/* Meta info */}
         <div className="hero-meta mt-8 space-y-1">
