@@ -1,0 +1,32 @@
+{
+  "projectName": "habib-portfolio",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "includeExamples": false,
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "postgresql"
+    }
+  },
+  "envVarValues": {},
+  "git": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "biome",
+    "sentry",
+    "compiler",
+    "db",
+    "drizzle",
+    "form",
+    "paraglide",
+    "shadcn",
+    "t3env",
+    "table",
+    "posthog",
+    "tanstack-query"
+  ]
+}
