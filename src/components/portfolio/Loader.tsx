@@ -3,66 +3,67 @@ import gsap from "gsap";
 
 const Loader = ({ onComplete }: { onComplete: () => void }) => {
   const [count, setCount] = useState(0);
-  const [exit, setExit] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check for repeat visit
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const visited = sessionStorage.getItem("portfolio-visited");
-    if (visited) {
+
+    if (prefersReducedMotion) {
+      sessionStorage.setItem("portfolio-visited", "true");
       onComplete();
       return;
     }
 
-    const duration = 1600;
-    const interval = 16;
-    const steps = duration / interval;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      step++;
-      // Ease-out curve for the counter
-      const progress = step / steps;
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.min(100, Math.round(eased * 100)));
-
-      if (step >= steps) {
-        clearInterval(timer);
+    const tl = gsap.timeline({
+      onComplete: () => {
         sessionStorage.setItem("portfolio-visited", "true");
-        
-        // GSAP animate out
-        if (containerRef.current) {
-          gsap.to(containerRef.current, {
-            clipPath: "inset(0 0 100% 0)",
-            duration: 0.6,
-            ease: "power3.inOut",
-            onComplete: () => {
-              setExit(true);
-              onComplete();
-            }
-          });
-        } else {
-          setExit(true);
-          onComplete();
-        }
+        onComplete();
       }
-    }, interval);
+    });
 
-    return () => clearInterval(timer);
+    if (visited) {
+      // 0.3s simple fade for returning visits
+      setCount(100);
+      tl.to(containerRef.current, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.inOut"
+      });
+    } else {
+      // 1.6s counter scrub
+      const counter = { val: 0 };
+      tl.to(counter, {
+        val: 100,
+        duration: 1.6,
+        ease: "power3.out",
+        onUpdate: () => setCount(Math.round(counter.val))
+      })
+      // Iris wipe (loader shrinks into center circle to reveal site)
+      .to(containerRef.current, {
+        clipPath: "circle(0% at 50% 50%)",
+        duration: 0.8,
+        ease: "power3.inOut"
+      });
+    }
+
+    return () => {
+      tl.kill();
+    };
   }, [onComplete]);
 
-  // Skip if repeat visit
+  // If repeat visit and reduced motion, skip rendering entirely
   const visited = sessionStorage.getItem("portfolio-visited");
-  if (visited) return null;
-
-  if (exit) return null;
+  const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (visited && reducedMotion) return null;
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#000000]"
+      style={{ clipPath: "circle(150% at 50% 50%)" }}
     >
-      <span className="font-mono text-[clamp(48px,10vw,120px)] font-light tracking-wider text-foreground tabular-nums">
+      <span className="font-mono text-[clamp(48px,10vw,120px)] font-light tracking-wider text-white tabular-nums">
         {String(count).padStart(3, "0")}
       </span>
     </div>

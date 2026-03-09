@@ -23,6 +23,8 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
+import { Link } from '@tanstack/react-router'
+
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -44,7 +46,31 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Habiboulaye - Creative Developer',
+      },
+      {
+        name: 'description',
+        content: 'Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.',
+      },
+      {
+        property: 'og:title',
+        content: 'Habiboulaye - Creative Developer',
+      },
+      {
+        property: 'og:description',
+        content: 'Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        property: 'og:url',
+        content: 'https://yourportfolio.domain',
+      },
+      {
+        property: 'og:image',
+        content: 'https://yourportfolio.domain/og-image.jpg',
       },
     ],
     links: [
@@ -54,6 +80,20 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  notFoundComponent: () => (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center portfolio-theme">
+      <h1 className="font-display mb-4 text-9xl text-foreground">404</h1>
+      <p className="font-editorial mb-8 text-xl text-muted-foreground">
+        The link you followed may be broken, or the page may have been removed.
+      </p>
+      <Link 
+        to="/" 
+        className="font-mono-data border border-primary px-8 py-3 text-primary transition-colors hover:bg-primary hover:text-black"
+      >
+        [RETURN TO ORIGIN]
+      </Link>
+    </div>
+  ),
   shellComponent: RootDocument,
 })
 

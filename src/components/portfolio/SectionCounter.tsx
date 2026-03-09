@@ -37,7 +37,7 @@ const SectionCounter = ({ activeSection }: { activeSection: string }) => {
 
   return (
     <div className="fixed right-8 top-8 z-[80] hidden md:block" ref={containerRef}>
-      <div className="font-mono text-xs tracking-[0.15em] text-text-ghost">
+      <div className="font-mono text-[11px] tracking-[0.15em] text-text-ghost">
         [{sectionNumbers[activeSection] || "001"} / {sectionNames[activeSection] || "HOME"}]
       </div>
     </div>

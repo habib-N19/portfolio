@@ -3,13 +3,13 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 const sections = [
-  { id: "hero", icon: "◉", label: "Home" },
-  { id: "about", icon: "≡", label: "About" },
-  { id: "work", icon: "▣", label: "Work" },
-  { id: "timeline", icon: "—", label: "Timeline" },
-  { id: "resume", icon: "📄", label: "Resume" },
-  { id: "blog", icon: "✎", label: "Blog" },
-  { id: "contact", icon: "✉", label: "Contact" },
+  { id: "hero",     icon: "◉", label: "HOME"    },
+  { id: "about",    icon: "≡", label: "ABOUT"   },
+  { id: "work",     icon: "▣", label: "WORK"    },
+  { id: "timeline", icon: "⊶", label: "TIME"    },
+  { id: "resume",   icon: "↗", label: "RESUME"  },
+  { id: "blog",     icon: "✎", label: "BLOG"    },
+  { id: "contact",  icon: "✉", label: "CONTACT" },
 ];
 
 const FloatingNav = ({ activeSection }: { activeSection: string }) => {
@@ -56,7 +56,7 @@ const FloatingNav = ({ activeSection }: { activeSection: string }) => {
       {visible && (
         <nav
           ref={navRef}
-          className="glass-surface fixed bottom-8 left-1/2 z-[90] -translate-x-1/2 rounded-full px-2 py-2"
+          className="fixed bottom-8 left-1/2 z-[90] -translate-x-1/2 rounded-full px-2 py-2 bg-[#0e0e0e]/85 backdrop-blur-[12px] border border-white/5"
           style={{ opacity: 0 }} // Hidden initially, GSAP will show it
         >
           <div className="flex items-center gap-1">

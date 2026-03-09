@@ -26,10 +26,9 @@ const BlogSection = () => {
   }, { scope: sectionRef });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (sectionRef.current && xTo.current && yTo.current) {
-      const rect = sectionRef.current.getBoundingClientRect();
-      xTo.current(e.clientX - rect.left + 24);
-      yTo.current(e.clientY - rect.top - 80);
+    if (xTo.current && yTo.current) {
+      xTo.current(e.clientX + 24);
+      yTo.current(e.clientY - 90);
     }
   };
 
@@ -147,7 +146,7 @@ const BlogSection = () => {
       {/* Floating hover image preview — desktop only */}
       <div
         ref={imageContainerRef}
-        className="pointer-events-none absolute z-[80] hidden overflow-hidden border border-surface-border md:block"
+        className="pointer-events-none fixed z-[80] hidden overflow-hidden border border-surface-border md:block"
         style={{
           width: 280,
           height: 180,

@@ -1,15 +1,29 @@
-const FilmGrain = () => {
-  return (
-    <div className="grain-overlay">
-      <svg width="100%" height="100%">
-        <filter id="grain-filter">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-          <feColorMatrix type="saturate" values="0" />
+const FilmGrain = () => (
+  <>
+    <svg style={{ position: "absolute", width: 0, height: 0 }}>
+      <defs>
+        <filter id="grain-filter" x="0%" y="0%" width="100%" height="100%"
+          colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65"
+            numOctaves="3" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" in="noise" result="grey" />
+          <feBlend in="SourceGraphic" in2="grey" mode="overlay" />
         </filter>
-        <rect width="100%" height="100%" filter="url(#grain-filter)" className="animate-grain" />
-      </svg>
-    </div>
-  );
-};
+      </defs>
+    </svg>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        pointerEvents: "none",
+        opacity: 0.035,
+        filter: "url(#grain-filter)",
+        width: "100%",
+        height: "100%",
+      }}
+    />
+  </>
+);
 
 export default FilmGrain;

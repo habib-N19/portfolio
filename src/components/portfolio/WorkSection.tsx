@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,6 +9,22 @@ import { projects, type Project } from "#/data/projects";
 const WorkSection = () => {
   const [selected, setSelected] = useState<Project | null>(null);
   const containerRef = useRef<HTMLElement>(null);
+
+  // Handle Escape key to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selected) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selected]);
+
+  const openProject = (project: Project) => {
+    setSelected(project);
+    window.history.pushState({}, '', `?project=${project.id}`);
+  };
 
   useGSAP(() => {
     const elements = gsap.utils.toArray(".work-reveal");
@@ -36,7 +52,10 @@ const WorkSection = () => {
       x: "100%", 
       duration: 0.4, 
       ease: "power3.in",
-      onComplete: () => setSelected(null) 
+      onComplete: () => {
+        setSelected(null);
+        window.history.pushState({}, '', window.location.pathname);
+      } 
     });
   };
 
@@ -69,7 +88,7 @@ const WorkSection = () => {
       {featured && (
         <div
           className="work-reveal project-card-hover mb-4 cursor-pointer border border-surface-border p-6 md:p-10"
-          onClick={() => setSelected(featured)}
+          onClick={() => openProject(featured)}
         >
           <div className="flex items-start justify-between">
             <div>
@@ -101,7 +120,7 @@ const WorkSection = () => {
           <div
             key={project.id}
             className="work-reveal project-card-hover cursor-pointer border border-surface-border p-6"
-            onClick={() => setSelected(project)}
+            onClick={() => openProject(project)}
           >
             <span className="font-mono-label text-text-secondary">[{project.number}]</span>
             <h3 className="font-display mt-2 text-[clamp(24px,3vw,40px)] text-foreground">
