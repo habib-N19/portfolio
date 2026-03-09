@@ -1,6 +1,6 @@
 const FilmGrain = () => (
   <>
-    <svg style={{ position: "absolute", width: 0, height: 0 }}>
+    <svg style={{ position: "absolute", width: 0, height: 0, pointerEvents: "none" }}>
       <defs>
         <filter id="grain-filter" x="0%" y="0%" width="100%" height="100%"
           colorInterpolationFilters="sRGB">
@@ -21,6 +21,9 @@ const FilmGrain = () => (
         filter: "url(#grain-filter)",
         width: "100%",
         height: "100%",
+        transform: "translateZ(0)", // Force hardware acceleration to prevent repaint flicker at scroll end
+        backfaceVisibility: "hidden",
+        perspective: 1000
       }}
     />
   </>

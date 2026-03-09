@@ -26,9 +26,22 @@ const WorkSection = () => {
   useEffect(() => {
     if (selected) {
       document.body.style.overflow = "hidden";
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.stop();
+      }
     } else {
       document.body.style.overflow = "";
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
     }
+    
+    return () => {
+      document.body.style.overflow = "";
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
+    };
   }, [selected]);
 
   const openProject = (project: Project) => {
@@ -108,20 +121,20 @@ const WorkSection = () => {
 
   return (
     <>
-      <section id="work" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20">
+      <section id="work" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20 overflow-hidden">
         {/* Ghost number */}
-        <div className="section-ghost-number absolute right-4 top-8 md:right-12">
+        <div className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50">
           003
         </div>
 
-        <h2 className="work-reveal font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
+        <h2 className="work-reveal relative z-10 font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
           SELECTED WORK
         </h2>
 
         {/* Featured project */}
         {featured && (
           <div
-            className="work-reveal project-card-hover mb-4 cursor-pointer border border-surface-border p-6 md:p-10"
+            className="work-reveal relative z-10 project-card-hover mb-4 cursor-pointer border border-surface-border p-6 md:p-10 bg-background/50 backdrop-blur-md"
             onClick={() => openProject(featured)}
           >
             <div className="flex items-start justify-between">
@@ -182,11 +195,12 @@ const WorkSection = () => {
       {selected && typeof document !== 'undefined' && createPortal(
         <div className="portfolio-theme contents">
           <div
-            className="project-modal-bg fixed inset-0 z-[95] bg-background/80"
+            className="project-modal-bg fixed inset-0 z-[95] bg-background/90 backdrop-blur-sm"
             onClick={handleClose}
           />
           <div
             className="project-modal-panel fixed bottom-0 right-0 top-0 z-[96] w-full overflow-y-auto border-l border-surface-border bg-background p-8 md:w-[70vw] md:p-12 lg:p-16"
+            style={{ overscrollBehavior: "contain" }}
             data-lenis-prevent="true"
           >
             <button

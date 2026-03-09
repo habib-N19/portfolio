@@ -39,15 +39,29 @@ function PortfolioPage() {
   useEffect(() => {
     if (loading) return
 
+    let maxIntersectionRatio = 0;
+    let mostVisibleSection = '';
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-            setActiveSection(entry.target.id)
+          if (entry.isIntersecting) {
+            if (entry.intersectionRatio > maxIntersectionRatio) {
+              maxIntersectionRatio = entry.intersectionRatio;
+              mostVisibleSection = entry.target.id;
+            }
           }
         }
+        
+        // Only update if we found a clearly visible section and it's different
+        if (mostVisibleSection && mostVisibleSection !== activeSection) {
+          setActiveSection(mostVisibleSection);
+        }
+        
+        // Reset for next batch of entries
+        maxIntersectionRatio = 0;
       },
-      { threshold: [0.3], rootMargin: '-10% 0px -10% 0px' },
+      { threshold: [0.2, 0.4, 0.6, 0.8], rootMargin: '-10% 0px -20% 0px' },
     )
 
     for (const id of sections) {
@@ -55,7 +69,18 @@ function PortfolioPage() {
       if (el) observerRef.current?.observe(el)
     }
 
-    return () => observerRef.current?.disconnect()
+    // Fallback for returning to absolute top
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection('hero');
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observerRef.current?.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    }
   }, [loading])
 
   return (

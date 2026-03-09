@@ -58,15 +58,25 @@ const ResumeSection = () => {
       document.body.style.overflow = "hidden";
       // Disable all ScrollTrigger instances to prevent background scroll
       ScrollTrigger.getAll().forEach((t) => t.disable(false));
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.stop();
+      }
     } else {
       document.body.style.overflow = "";
       // Re-enable all ScrollTrigger instances
       ScrollTrigger.getAll().forEach((t) => t.enable());
+      if (typeof window !== "undefined" && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
     }
     return () => {
       // Cleanup: ensure ScrollTriggers are re-enabled if component unmounts while open
+      document.body.style.overflow = "";
       if (panelOpen) {
         ScrollTrigger.getAll().forEach((t) => t.enable());
+        if (typeof window !== "undefined" && (window as any).lenis) {
+          (window as any).lenis.start();
+        }
       }
     };
   }, [panelOpen]);
@@ -151,7 +161,7 @@ const ResumeSection = () => {
       {panelOpen && (
         <>
           <div
-            className="resume-modal-bg fixed inset-0 z-[95] bg-background/80"
+            className="resume-modal-bg fixed inset-0 z-[95] bg-background/90 backdrop-blur-sm"
             onClick={handleClose}
           />
           <div

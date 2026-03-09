@@ -377,18 +377,18 @@ a {
   font-family: 'Libre Baskerville', Georgia, serif;
   line-height: 1.72;
   overflow-x: hidden;
+  cursor: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.portfolio-theme * {
+  cursor: none;
 }
 
 /* Custom scrollbar for portfolio */
 .portfolio-theme ::-webkit-scrollbar {
-  width: 8px;
-}
-.portfolio-theme ::-webkit-scrollbar-track {
-  background: transparent;
-}
-.portfolio-theme ::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent-signal));
-  border-radius: 0;
+  display: none;
 }
 
 /* Selection for portfolio */

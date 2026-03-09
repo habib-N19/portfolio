@@ -97,10 +97,13 @@ const HeroSection = () => {
 
       {/* Scroll indicator */}
       <div
-        className="hero-scroll absolute bottom-8 left-6 md:left-12"
-        style={{ opacity: showScroll ? 0.4 : 0, transition: "opacity 0.4s ease" }}
+        className="hero-scroll absolute bottom-8 left-6 md:left-12 flex items-center gap-3"
+        style={{ opacity: showScroll ? 0.7 : 0, transition: "opacity 0.4s ease" }}
       >
-        <span className="font-mono-data text-muted-foreground">[↓ 001]</span>
+        <div className="relative flex h-[42px] w-[24px] justify-center rounded-full border border-muted-foreground/40 p-[4px]">
+          <div className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_2s_infinite]" />
+        </div>
+        <span className="font-mono-data text-muted-foreground tracking-[0.2em]">[SCROLL]</span>
       </div>
     </section>
   );
