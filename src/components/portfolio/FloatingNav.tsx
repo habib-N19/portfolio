@@ -1,16 +1,27 @@
 import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import {
+  Home,
+  User,
+  Briefcase,
+  Clock,
+  Github,
+  FileText,
+  PenTool,
+  Mail,
+  type LucideIcon,
+} from "lucide-react";
 
-const sections = [
-  { id: "hero",     icon: "◉", label: "HOME"    },
-  { id: "about",    icon: "≡", label: "ABOUT"   },
-  { id: "work",     icon: "▣", label: "WORK"    },
-  { id: "timeline", icon: "⊶", label: "TIME"    },
-  { id: "github",   icon: "⌥", label: "GITHUB"  },
-  { id: "resume",   icon: "↗", label: "RESUME"  },
-  { id: "blog",     icon: "✎", label: "BLOG"    },
-  { id: "contact",  icon: "✉", label: "CONTACT" },
+const sections: { id: string; icon: LucideIcon; label: string }[] = [
+  { id: "hero",     icon: Home,      label: "HOME"    },
+  { id: "about",    icon: User,      label: "ABOUT"   },
+  { id: "work",     icon: Briefcase, label: "WORK"    },
+  { id: "timeline", icon: Clock,     label: "TIME"    },
+  { id: "github",   icon: Github,    label: "GITHUB"  },
+  { id: "resume",   icon: FileText,  label: "RESUME"  },
+  { id: "blog",     icon: PenTool,   label: "BLOG"    },
+  { id: "contact",  icon: Mail,      label: "CONTACT" },
 ];
 
 const FloatingNav = ({ activeSection }: { activeSection: string }) => {
@@ -67,26 +78,28 @@ const FloatingNav = ({ activeSection }: { activeSection: string }) => {
                 onClick={() => scrollToSection(section.id)}
                 onMouseEnter={() => setHoveredItem(section.id)}
                 onMouseLeave={() => setHoveredItem(null)}
-                className="relative flex items-center gap-2 rounded-full px-3 py-2 transition-colors duration-200"
+                className="relative flex items-center gap-2 rounded-full px-3 py-2 transition-colors duration-400"
               >
-                <span
-                  className={`relative z-10 text-sm transition-colors duration-200 ${
+                <section.icon
+                  size={18}
+                  strokeWidth={1.8}
+                  className={`relative z-10 transition-colors duration-200 ${
                     activeSection === section.id
                       ? "text-primary"
                       : "text-muted-foreground"
                   }`}
-                >
-                  {section.icon}
-                </span>
+                />
                 
                 <span
-                  className="relative z-10 overflow-hidden whitespace-nowrap font-mono text-[11px] tracking-widest text-foreground transition-all duration-300 ease-out"
+                  className="relative z-10 grid transition-[grid-template-columns,opacity] duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
                   style={{
-                    maxWidth: hoveredItem === section.id ? 100 : 0,
+                    gridTemplateColumns: hoveredItem === section.id ? "1fr" : "0fr",
                     opacity: hoveredItem === section.id ? 1 : 0,
                   }}
                 >
-                  {section.label}
+                  <span className="overflow-hidden whitespace-nowrap font-mono text-[11px] tracking-widest text-foreground min-w-0">
+                    {section.label}
+                  </span>
                 </span>
 
                 {activeSection === section.id && (

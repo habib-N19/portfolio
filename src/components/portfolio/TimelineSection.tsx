@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -25,156 +25,198 @@ const tagBorderColors: Record<string, string> = {
 };
 
 const TimelineSection = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const spineRef = useRef<SVGLineElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    // Animate the vertical spine line drawing in
-    if (spineRef.current) {
-      const lineLength = spineRef.current.getTotalLength();
-      gsap.set(spineRef.current, {
-        strokeDasharray: lineLength,
-        strokeDashoffset: lineLength,
-      });
+  // Autoplay functionality, pauses on hover
+  useEffect(() => {
+    if (isHovered) return;
 
-      gsap.to(spineRef.current, {
-        strokeDashoffset: 0,
-        ease: "none",
+    const intervalId = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % timelineData.length);
+    }, 4500); // 4.5 seconds per slide is a good pacing for reading
+
+    return () => clearInterval(intervalId);
+  }, [isHovered]);
+
+  useGSAP(
+    () => {
+      // Setup initial reveal
+      gsap.from(".timeline-track", {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 80%",
-          end: "bottom 20%",
-          scrub: 1.5,
-        },
-      });
-    }
-
-    // Animate each timeline card
-    const cards = gsap.utils.toArray(".timeline-card");
-    cards.forEach((card, i) => {
-      const el = card as HTMLElement;
-      const isLeft = i % 2 === 0;
-
-      gsap.from(el, {
-        scrollTrigger: {
-          trigger: el,
-          start: "top 85%",
           toggleActions: "play none none reverse",
         },
-        x: isLeft ? -60 : 60,
+        y: 40,
         opacity: 0,
-        duration: 0.9,
+        duration: 0.8,
         ease: "power3.out",
-        delay: 0.1,
       });
-    });
 
-    // Animate the dots on the spine
-    const dots = gsap.utils.toArray(".timeline-dot");
-    dots.forEach((dot) => {
-      gsap.from(dot as HTMLElement, {
+      gsap.from(".timeline-node", {
         scrollTrigger: {
-          trigger: dot as HTMLElement,
+          trigger: containerRef.current,
           start: "top 80%",
           toggleActions: "play none none reverse",
         },
-        scale: 0,
+        y: 20,
+        opacity: 0,
         duration: 0.5,
-        ease: "back.out(2)",
+        stagger: 0.1,
+        ease: "back.out(1.5)",
       });
-    });
-  }, { scope: containerRef });
+    },
+    { scope: containerRef }
+  );
+
+  // Animate content when activeIndex changes
+  useGSAP(
+    () => {
+      if (contentRef.current && ghostRef.current) {
+        // Subtle glitch/fade effect on the content card
+        gsap.fromTo(
+          contentRef.current,
+          { opacity: 0, y: 15, rotateX: 5 },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 0.6,
+            ease: "power3.out",
+            clearProps: "transform",
+          }
+        );
+
+        // Flash/blur effect on the massive background year
+        gsap.fromTo(
+          ghostRef.current,
+          { opacity: 0, scale: 0.95, filter: "blur(10px)" },
+          {
+            opacity: 0.05,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.8,
+            ease: "expo.out",
+          }
+        );
+      }
+    },
+    { dependencies: [activeIndex], scope: containerRef }
+  );
+
+  const activeNode = timelineData[activeIndex];
 
   return (
-    <section id="timeline" ref={containerRef} className="relative px-6 py-32 md:px-12 lg:px-20">
-      {/* Ghost number */}
+    <section
+      id="timeline"
+      ref={containerRef}
+      className="relative flex min-h-[90vh] flex-col items-center justify-center px-6 py-24 md:px-12 lg:px-20"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Small Section Number */}
       <div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
         004
       </div>
 
-      <h2 className="font-display mb-20 text-[clamp(40px,6vw,80px)] text-foreground">
-        TIMELINE
-      </h2>
+      <div className="mx-auto w-full max-w-6xl">
+        <h2 className="font-display mb-12 text-[clamp(40px,6vw,80px)] text-foreground">
+          TIMELINE
+        </h2>
 
-      {/* Timeline container with center spine */}
-      <div className="relative mx-auto max-w-5xl">
-        {/* Vertical spine SVG */}
-        <svg
-          className="timeline-spine absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <line
-            ref={spineRef}
-            x1="1" y1="0" x2="1" y2="100%"
-            stroke="hsl(var(--bg-border))"
-            strokeWidth="2"
-          />
-        </svg>
+        {/* 1. The Interactive Track (Nodes/Years) */}
+        <div className="timeline-track relative mb-16 md:mb-24 flex items-center justify-between border-surface-border">
+          {/* Connecting Line behind the nodes */}
+          <div className="absolute left-0 top-1/2 h-[1px] w-full -translate-y-1/2 bg-surface-border" />
 
-        {/* Timeline nodes */}
-        <div className="relative space-y-16 md:space-y-24">
+          {/* Render individual nodes */}
           {timelineData.map((node, i) => {
-            const isLeft = i % 2 === 0;
+            const isActive = i === activeIndex;
 
             return (
-              <div
+              <button
                 key={i}
-                className={`timeline-card relative flex items-start gap-8 md:gap-12 ${
-                  isLeft ? "md:flex-row" : "md:flex-row-reverse"
+                onClick={() => setActiveIndex(i)}
+                className={`timeline-node group relative z-10 flex flex-col items-center gap-4 transition-all duration-300 md:px-4 ${
+                  isActive ? "scale-110" : "hover:scale-105"
                 }`}
+                aria-label={`View timeline details for ${node.year}`}
+                aria-pressed={isActive}
               >
-                {/* Content card */}
-                <div
-                  className={`relative w-full md:w-[calc(50%-2rem)] ${
-                    isLeft ? "md:text-right" : "md:text-left"
+                {/* Year Label above dot (optional on small screens) */}
+                <span
+                  className={`font-mono-label absolute bottom-full mb-4 text-xs tracking-widest transition-colors duration-300 md:text-sm ${
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 >
-                  {/* Year as ghost background */}
-                  <span
-                    className={`font-display absolute -top-8 text-[clamp(64px,10vw,120px)] text-text-ghost leading-none select-none pointer-events-none ${
-                      isLeft ? "md:right-0" : "md:left-0"
-                    } left-0`}
-                  >
-                    {node.year}
-                  </span>
+                  {node.year}
+                </span>
 
-                  {/* Card content */}
-                  <div
-                    className={`timeline-card-inner relative border border-surface-border bg-[hsl(var(--bg-surface)/0.6)] p-6 md:p-8 transition-all duration-300 hover:border-[hsl(var(--accent-signal)/0.3)] hover:bg-[hsl(var(--bg-surface)/0.9)]`}
-                  >
-                    <span
-                      className={`font-mono-label mb-3 inline-block border px-2 py-0.5 ${
-                        tagColors[node.tag] || "text-muted-foreground"
-                      } ${tagBorderColors[node.tag] || "border-surface-border"}`}
-                    >
-                      [{node.tag}]
-                    </span>
-
-                    <h3 className="font-display mt-2 text-2xl text-foreground md:text-3xl">
-                      {node.title}
-                    </h3>
-
-                    <p className="font-editorial mt-3 text-sm text-muted-foreground max-w-sm"
-                      style={isLeft ? { marginLeft: "auto" } : {}}
-                    >
-                      {node.description}
-                    </p>
-                  </div>
+                {/* The Dot */}
+                <div
+                  className={`relative flex h-4 w-4 items-center justify-center rounded-sm transition-all duration-300 md:h-5 md:w-5 ${
+                    isActive
+                      ? "bg-primary shadow-[0_0_20px_hsl(var(--primary)/0.5)]"
+                      : "bg-background border border-surface-border group-hover:border-muted-foreground group-hover:bg-muted-foreground/20"
+                  }`}
+                >
+                  {/* Inner pulse ring for active */}
+                  {isActive && (
+                    <div className="absolute inset-0 animate-ping rounded-sm bg-primary/40" />
+                  )}
                 </div>
-
-                {/* Center dot on spine */}
-                <div className="timeline-dot absolute left-1/2 top-8 z-10 -translate-x-1/2 hidden md:flex items-center justify-center">
-                  <div className="h-4 w-4 rounded-full border-2 border-surface-border bg-background">
-                    <div className="absolute inset-[3px] rounded-full bg-primary opacity-60" />
-                  </div>
-                </div>
-
-                {/* Spacer for the other side */}
-                <div className="hidden md:block md:w-[calc(50%-2rem)]" />
-              </div>
+              </button>
             );
           })}
+        </div>
+
+        {/* 2. The Content Panel */}
+        <div className="relative flex min-h-[320px] w-full items-center justify-center overflow-hidden">
+          {/* Massive background year (Ghost) */}
+          <div
+            ref={ghostRef}
+            className="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none"
+            aria-hidden="true"
+          >
+            <span className="font-display text-[clamp(150px,25vw,400px)] leading-none text-foreground opacity-[0.03]">
+              {activeNode.year}
+            </span>
+          </div>
+
+          {/* Content Card */}
+          <div
+            ref={contentRef}
+            className="relative z-10 w-full max-w-3xl border border-surface-border bg-[hsl(var(--bg-surface)/0.5)] backdrop-blur-xl p-8 md:p-12 transition-all duration-300 hover:border-[hsl(var(--accent-signal)/0.3)] hover:bg-[hsl(var(--bg-surface)/0.8)]"
+          >
+            {/* Header info: Tag + Floating Year */}
+            <div className="mb-6 flex items-start justify-between">
+              <span
+                className={`font-mono-label inline-block border px-3 py-1 text-sm tracking-wider ${
+                  tagColors[activeNode.tag] || "text-muted-foreground"
+                } ${tagBorderColors[activeNode.tag] || "border-surface-border"}`}
+              >
+                [{activeNode.tag}]
+              </span>
+
+              {/* Just to reinforce the year conceptually inside the card */}
+              <span className="font-mono-label text-muted-foreground/50">
+                {activeNode.year} // {timelineData.length - activeIndex}
+              </span>
+            </div>
+
+            <h3 className="font-display mb-6 text-3xl leading-tight text-foreground md:text-5xl lg:text-6xl">
+              {activeNode.title}
+            </h3>
+
+            <p className="font-editorial text-base leading-relaxed text-muted-foreground md:text-lg max-w-2xl">
+              {activeNode.description}
+            </p>
+          </div>
         </div>
       </div>
     </section>

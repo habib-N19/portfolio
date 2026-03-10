@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import Loader from '#/components/portfolio/Loader'
 import CustomCursor from '#/components/portfolio/CustomCursor'
@@ -7,18 +7,20 @@ import SectionCounter from '#/components/portfolio/SectionCounter'
 import FilmGrain from '#/components/portfolio/FilmGrain'
 import HeroSection from '#/components/portfolio/HeroSection'
 import AboutSection from '#/components/portfolio/AboutSection'
-import WorkSection from '#/components/portfolio/WorkSection'
-import TimelineSection from '#/components/portfolio/TimelineSection'
-import GitHubSection from '#/components/portfolio/GitHubSection'
-import ResumeSection from '#/components/portfolio/ResumeSection'
-import BlogSection from '#/components/portfolio/BlogSection'
-import ContactSection from '#/components/portfolio/ContactSection'
 import SmoothScroll from '#/components/portfolio/SmoothScroll'
-import WebGLBackground from '#/components/portfolio/WebGLBackground'
+
+// Lazy loaded heavy components
+const WebGLBackground = lazy(() => import('#/components/portfolio/WebGLBackground'))
+const WorkSection = lazy(() => import('#/components/portfolio/WorkSection'))
+const TimelineSection = lazy(() => import('#/components/portfolio/TimelineSection'))
+const GitHubSection = lazy(() => import('#/components/portfolio/GitHubSection'))
+const ResumeSection = lazy(() => import('#/components/portfolio/ResumeSection'))
+const BlogSection = lazy(() => import('#/components/portfolio/BlogSection'))
+const ContactSection = lazy(() => import('#/components/portfolio/ContactSection'))
 
 export const Route = createFileRoute('/')({ component: PortfolioPage })
 
-const sections = ['hero', 'about', 'work', 'timeline', 'github', 'resume', 'blog', 'contact']
+const sections = ['hero', 'about', 'work', 'blog', 'timeline', 'github', 'resume', 'contact']
 
 function PortfolioPage() {
   const [loading, setLoading] = useState(true)
@@ -86,29 +88,33 @@ function PortfolioPage() {
   return (
     <SmoothScroll>
       <div className="portfolio-theme">
-        <WebGLBackground />
+        <Suspense fallback={null}>
+          <WebGLBackground />
+        </Suspense>
         
         {loading && <Loader onComplete={onLoadComplete} />}
 
         {!loading && (
           <>
             <CustomCursor />
-          <FloatingNav activeSection={activeSection} />
-          <SectionCounter activeSection={activeSection} />
-          <FilmGrain />
+            <FloatingNav activeSection={activeSection} />
+            <SectionCounter activeSection={activeSection} />
+            <FilmGrain />
 
-          <main>
-            <HeroSection />
-            <AboutSection />
-            <WorkSection />
-            <TimelineSection />
-            <GitHubSection />
-            <ResumeSection />
-            <BlogSection />
-            <ContactSection />
-          </main>
-        </>
-      )}
+            <main>
+              <HeroSection />
+              <AboutSection />
+              <Suspense fallback={null}>
+                <WorkSection />
+                <BlogSection />
+                <TimelineSection />
+                <GitHubSection />
+                <ResumeSection />
+                <ContactSection />
+              </Suspense>
+            </main>
+          </>
+        )}
       </div>
     </SmoothScroll>
   )
