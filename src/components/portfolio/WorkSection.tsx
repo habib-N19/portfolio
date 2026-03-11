@@ -1,350 +1,428 @@
-import { useRef, useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 gsap.registerPlugin(ScrollTrigger);
-import { projects, type Project } from "#/data/projects";
+
 import { githubData } from "#/data/github";
+import { type Project, projects } from "#/data/projects";
 
 const WorkSection = () => {
-  const [selected, setSelected] = useState<Project | null>(null);
-  const containerRef = useRef<HTMLElement>(null);
+	const [selected, setSelected] = useState<Project | null>(null);
+	const containerRef = useRef<HTMLElement>(null);
 
-  // Handle Escape key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && selected) {
-        handleClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selected]);
+	// Handle Escape key to close
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && selected) {
+				handleClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [selected]);
 
-  // Lock scroll when project panel is open
-  useEffect(() => {
-    if (selected) {
-      document.body.style.overflow = "hidden";
-      if (typeof window !== "undefined" && (window as any).lenis) {
-        (window as any).lenis.stop();
-      }
-    } else {
-      document.body.style.overflow = "";
-      if (typeof window !== "undefined" && (window as any).lenis) {
-        (window as any).lenis.start();
-      }
-    }
-    
-    return () => {
-      document.body.style.overflow = "";
-      if (typeof window !== "undefined" && (window as any).lenis) {
-        (window as any).lenis.start();
-      }
-    };
-  }, [selected]);
+	// Lock scroll when project panel is open
+	useEffect(() => {
+		if (selected) {
+			document.body.style.overflow = "hidden";
+			if (typeof window !== "undefined" && (window as any).lenis) {
+				(window as any).lenis.stop();
+			}
+		} else {
+			document.body.style.overflow = "";
+			if (typeof window !== "undefined" && (window as any).lenis) {
+				(window as any).lenis.start();
+			}
+		}
 
-  const openProject = (project: Project) => {
-    setSelected(project);
-    window.history.pushState({}, '', `?project=${project.id}`);
-  };
+		return () => {
+			document.body.style.overflow = "";
+			if (typeof window !== "undefined" && (window as any).lenis) {
+				(window as any).lenis.start();
+			}
+		};
+	}, [selected]);
 
-  useGSAP(() => {
-    const elements = gsap.utils.toArray(".work-reveal");
+	const openProject = (project: Project) => {
+		setSelected(project);
+		window.history.pushState({}, "", `?project=${project.id}`);
+	};
 
-    elements.forEach((el, i) => {
-      gsap.from(el as HTMLElement, {
-        scrollTrigger: {
-          trigger: el as HTMLElement,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        delay: i * 0.1,
-      });
-    });
-  }, { scope: containerRef });
+	useGSAP(
+		() => {
+			const elements = gsap.utils.toArray(".work-reveal");
 
-  const handleClose = () => {
-    // Manually animate out before unmounting
-    gsap.to(".project-modal-bg", { opacity: 0, duration: 0.3 });
-    gsap.to(".project-modal-panel", { 
-      x: "100%", 
-      duration: 0.4, 
-      ease: "power3.in",
-      onComplete: () => {
-        setSelected(null);
-        window.history.pushState({}, '', window.location.pathname);
-      } 
-    });
-  };
+			elements.forEach((el, i) => {
+				gsap.from(el as HTMLElement, {
+					scrollTrigger: {
+						trigger: el as HTMLElement,
+						start: "top 85%",
+						toggleActions: "play none none reverse",
+					},
+					y: 40,
+					opacity: 0,
+					duration: 0.8,
+					ease: "power2.out",
+					delay: i * 0.1,
+				});
+			});
+		},
+		{ scope: containerRef },
+	);
 
-  // Animate modal in when selected changes
-  useGSAP(() => {
-    if (selected) {
-      gsap.fromTo(".project-modal-bg", { opacity: 0 }, { opacity: 1, duration: 0.3 });
-      gsap.fromTo(".project-modal-panel", 
-        { x: "100%" }, 
-        { x: 0, duration: 0.5, ease: "power3.out" }
-      );
+	const handleClose = () => {
+		// Manually animate out before unmounting
+		gsap.to(".project-modal-bg", { opacity: 0, duration: 0.3 });
+		gsap.to(".project-modal-panel", {
+			x: "100%",
+			duration: 0.4,
+			ease: "power3.in",
+			onComplete: () => {
+				setSelected(null);
+				window.history.pushState({}, "", window.location.pathname);
+			},
+		});
+	};
 
-      // Trigger media reveal animations
-      setTimeout(() => {
-        const mediaElements = gsap.utils.toArray(".project-media-reveal");
-        mediaElements.forEach((el, i) => {
-          gsap.fromTo(el as HTMLElement,
-            { y: 40, opacity: 0 },
-            {
-              scrollTrigger: {
-                trigger: el as HTMLElement,
-                scroller: ".project-modal-panel", // use the modal panel as the scroller
-                start: "top 95%",
-                toggleActions: "play none none reverse",
-              },
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-              delay: i * 0.1,
-            }
-          );
-        });
-      }, 400); // slight delay to wait for panel slide
-    }
-  }, { dependencies: [selected] }); // Removed scope: containerRef because modal is portaled to document.body
+	// Animate modal in when selected changes
+	useGSAP(
+		() => {
+			if (selected) {
+				gsap.fromTo(
+					".project-modal-bg",
+					{ opacity: 0 },
+					{ opacity: 1, duration: 0.3 },
+				);
+				gsap.fromTo(
+					".project-modal-panel",
+					{ x: "100%" },
+					{ x: 0, duration: 0.5, ease: "power3.out" },
+				);
 
-  const featured = projects.find((p) => p.featured);
-  const rest = projects.filter((p) => !p.featured);
+				// Trigger media reveal animations
+				setTimeout(() => {
+					const mediaElements = gsap.utils.toArray(".project-media-reveal");
+					mediaElements.forEach((el, i) => {
+						gsap.fromTo(
+							el as HTMLElement,
+							{ y: 40, opacity: 0 },
+							{
+								scrollTrigger: {
+									trigger: el as HTMLElement,
+									scroller: ".project-modal-panel", // use the modal panel as the scroller
+									start: "top 95%",
+									toggleActions: "play none none reverse",
+								},
+								y: 0,
+								opacity: 1,
+								duration: 0.8,
+								ease: "power2.out",
+								delay: i * 0.1,
+							},
+						);
+					});
+				}, 400); // slight delay to wait for panel slide
+			}
+		},
+		{ dependencies: [selected] },
+	); // Removed scope: containerRef because modal is portaled to document.body
 
-  return (
-    <>
-      <section id="work" ref={containerRef} className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20 overflow-hidden">
-        {/* Ghost number */}
-        <div className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50" aria-hidden="true">
-          003
-        </div>
+	const featured = projects.find((p) => p.featured);
+	const rest = projects.filter((p) => !p.featured);
 
-        <h2 className="work-reveal relative z-10 font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
-          SELECTED WORK
-        </h2>
+	return (
+		<>
+			<section
+				id="work"
+				ref={containerRef}
+				className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20 overflow-hidden"
+			>
+				{/* Ghost number */}
+				<div
+					className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50"
+					aria-hidden="true"
+				>
+					003
+				</div>
 
-        {/* Featured project */}
-        {featured && (
-          <div
-            className="work-reveal relative z-10 project-card-hover mb-4 cursor-pointer border border-surface-border p-6 md:p-10 bg-background/50 backdrop-blur-md"
-            onClick={() => openProject(featured)}
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="font-mono-label text-text-secondary">[{featured.number}] — FEATURED</span>
-                <h3 className="font-display mt-2 text-[clamp(32px,5vw,64px)] text-foreground">
-                  {featured.title}
-                </h3>
-                <p className="font-editorial mt-2 max-w-lg text-muted-foreground">
-                  {featured.shortDesc}
-                </p>
-              </div>
-              <span className="font-mono-data hidden text-text-secondary md:block">
-                {featured.year}
-              </span>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {featured.tags.map((tag) => (
-                <span key={tag} className="font-mono-data border border-surface-border px-3 py-1 text-muted-foreground">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+				<h2 className="work-reveal relative z-10 font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
+					SELECTED WORK
+				</h2>
 
-        {/* Grid */}
-        <div className="grid gap-4 md:grid-cols-2">
-          {rest.map((project) => (
-            <div
-              key={project.id}
-              className="work-reveal project-card-hover cursor-pointer border border-surface-border p-6"
-              onClick={() => openProject(project)}
-            >
-              <span className="font-mono-label text-text-secondary">[{project.number}]</span>
-              <h3 className="font-display mt-2 text-[clamp(24px,3vw,40px)] text-foreground">
-                {project.title}
-              </h3>
-              <p className="font-editorial mt-2 text-sm text-muted-foreground">
-                {project.shortDesc}
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex flex-wrap gap-1">
-                  {project.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="font-mono-data text-[11px] text-text-secondary">
-                      {tag}{project.tags.indexOf(tag) < Math.min(2, project.tags.length - 1) ? " ·" : ""}
-                    </span>
-                  ))}
-                </div>
-                <span className="font-mono-data text-text-secondary">{project.year}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+				{/* Featured project */}
+				{featured && (
+					<div
+						className="work-reveal relative z-10 project-card-hover mb-4 cursor-pointer border border-surface-border p-6 md:p-10 bg-background/50 backdrop-blur-md"
+						onClick={() => openProject(featured)}
+					>
+						<div className="flex items-start justify-between">
+							<div>
+								<span className="font-mono-label text-text-secondary">
+									[{featured.number}] — FEATURED
+								</span>
+								<h3 className="font-display mt-2 text-[clamp(32px,5vw,64px)] text-foreground">
+									{featured.title}
+								</h3>
+								<p className="font-editorial mt-2 max-w-lg text-muted-foreground">
+									{featured.shortDesc}
+								</p>
+							</div>
+							<span className="font-mono-data hidden text-text-secondary md:block">
+								{featured.year}
+							</span>
+						</div>
+						<div className="mt-6 flex flex-wrap gap-2">
+							{featured.tags.map((tag) => (
+								<span
+									key={tag}
+									className="font-mono-data border border-surface-border px-3 py-1 text-muted-foreground"
+								>
+									{tag}
+								</span>
+							))}
+						</div>
+					</div>
+				)}
 
-        {/* Compact GitHub Activity Block */}
-        <div className="work-reveal mt-20 pt-16 border-t border-surface-border">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-mono-label text-text-secondary">OPEN SOURCE / GITHUB</h3>
-            <a 
-              href={`https://github/${githubData.username}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-mono-data text-xs text-primary hover:underline"
-            >
-              @{githubData.username} ↗
-            </a>
-          </div>
+				{/* Grid */}
+				<div className="grid gap-4 md:grid-cols-2">
+					{rest.map((project) => (
+						<div
+							key={project.id}
+							className="work-reveal project-card-hover cursor-pointer border border-surface-border p-6"
+							onClick={() => openProject(project)}
+						>
+							<span className="font-mono-label text-text-secondary">
+								[{project.number}]
+							</span>
+							<h3 className="font-display mt-2 text-[clamp(24px,3vw,40px)] text-foreground">
+								{project.title}
+							</h3>
+							<p className="font-editorial mt-2 text-sm text-muted-foreground">
+								{project.shortDesc}
+							</p>
+							<div className="mt-4 flex items-center justify-between">
+								<div className="flex flex-wrap gap-1">
+									{project.tags.slice(0, 3).map((tag) => (
+										<span
+											key={tag}
+											className="font-mono-data text-[11px] text-text-secondary"
+										>
+											{tag}
+											{project.tags.indexOf(tag) <
+											Math.min(2, project.tags.length - 1)
+												? " ·"
+												: ""}
+										</span>
+									))}
+								</div>
+								<span className="font-mono-data text-text-secondary">
+									{project.year}
+								</span>
+							</div>
+						</div>
+					))}
+				</div>
 
-          <div className="feature-card border border-surface-border p-8 pb-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <p className="font-mono-label text-text-secondary mb-1">CONTRIBUTIONS</p>
-                <p className="font-display text-4xl text-foreground">{githubData.totalContributions}</p>
-              </div>
-              <div>
-                <p className="font-mono-label text-text-secondary mb-1">REPOSITORIES</p>
-                <p className="font-display text-4xl text-foreground">{githubData.reposCount}</p>
-              </div>
-              <div>
-                <p className="font-mono-label text-text-secondary mb-1">COMMITS (YTD)</p>
-                <p className="font-display text-4xl text-foreground">{githubData.commitsThisYear}</p>
-              </div>
-              <div>
-                <p className="font-mono-label text-text-secondary mb-1">PRS MERGED</p>
-                <p className="font-display text-4xl text-foreground">{githubData.prsMerged}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+				{/* Compact GitHub Activity Block */}
+				<div className="work-reveal mt-20 pt-16 border-t border-surface-border">
+					<div className="flex items-center justify-between mb-8">
+						<h3 className="font-mono-label text-text-secondary">
+							OPEN SOURCE / GITHUB
+						</h3>
+						<a
+							href={`https://github/${githubData.username}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="font-mono-data text-xs text-primary hover:underline"
+						>
+							@{githubData.username} ↗
+						</a>
+					</div>
 
-      {/* Expanded Panel — portaled to body to escape stacking context */}
-      {selected && typeof document !== 'undefined' && createPortal(
-        <div className="portfolio-theme contents">
-          <div
-            className="project-modal-bg fixed inset-0 z-[95] bg-background/90 backdrop-blur-sm"
-            onClick={handleClose}
-          />
-          <div
-            className="project-modal-panel fixed bottom-0 right-0 top-0 z-[96] w-full overflow-y-auto border-l border-surface-border bg-background p-8 md:w-[70vw] md:p-12 lg:p-16"
-            style={{ overscrollBehavior: "contain" }}
-            data-lenis-prevent="true"
-          >
-            <button
-              onClick={handleClose}
-              className="font-mono-label mb-12 text-text-secondary transition-colors hover:text-foreground"
-            >
-              ← CLOSE
-            </button>
+					<div className="feature-card border border-surface-border p-8 pb-10">
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+							<div>
+								<p className="font-mono-label text-text-secondary mb-1">
+									CONTRIBUTIONS
+								</p>
+								<p className="font-display text-4xl text-foreground">
+									{githubData.totalContributions}
+								</p>
+							</div>
+							<div>
+								<p className="font-mono-label text-text-secondary mb-1">
+									REPOSITORIES
+								</p>
+								<p className="font-display text-4xl text-foreground">
+									{githubData.reposCount}
+								</p>
+							</div>
+							<div>
+								<p className="font-mono-label text-text-secondary mb-1">
+									COMMITS (YTD)
+								</p>
+								<p className="font-display text-4xl text-foreground">
+									{githubData.commitsThisYear}
+								</p>
+							</div>
+							<div>
+								<p className="font-mono-label text-text-secondary mb-1">
+									PRS MERGED
+								</p>
+								<p className="font-display text-4xl text-foreground">
+									{githubData.prsMerged}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
 
-            <span className="font-mono-label text-text-secondary">
-              [{selected.number}] — {selected.year} — {selected.role}
-            </span>
-            <h2 className="font-display mt-2 text-[clamp(36px,5vw,72px)] text-foreground">
-              {selected.title}
-            </h2>
+			{/* Expanded Panel — portaled to body to escape stacking context */}
+			{selected &&
+				typeof document !== "undefined" &&
+				createPortal(
+					<div className="portfolio-theme contents">
+						<div
+							className="project-modal-bg fixed inset-0 z-[95] bg-background/95 backdrop-blur-md"
+							onClick={handleClose}
+						/>
+						<div
+							className="project-modal-panel fixed bottom-0 right-0 top-0 z-[96] w-full overflow-y-auto border-l border-surface-border bg-background p-8 md:w-[70vw] md:p-12 lg:p-16"
+							style={{ overscrollBehavior: "contain" }}
+							data-lenis-prevent="true"
+						>
+							<button
+								onClick={handleClose}
+								className="font-mono-label mb-12 text-text-secondary transition-colors hover:text-foreground"
+							>
+								← CLOSE
+							</button>
 
-            <div className="mt-12 grid gap-12 md:grid-cols-3">
-              <div>
-                <span className="font-mono-label mb-3 block text-primary">PROBLEM</span>
-                <p className="font-editorial text-sm text-foreground">{selected.problem}</p>
-              </div>
-              <div>
-                <span className="font-mono-label mb-3 block text-primary">APPROACH</span>
-                <p className="font-editorial text-sm text-foreground">{selected.approach}</p>
-              </div>
-              <div>
-                <span className="font-mono-label mb-3 block text-primary">OUTCOME</span>
-                <p className="font-editorial text-sm text-foreground">{selected.outcome}</p>
-              </div>
-            </div>
+							<span className="font-mono-label text-text-secondary">
+								[{selected.number}] — {selected.year} — {selected.role}
+							</span>
+							<h2 className="font-display mt-2 text-[clamp(36px,5vw,72px)] text-foreground">
+								{selected.title}
+							</h2>
 
-            <div className="mt-12">
-              <span className="font-mono-label mb-3 block text-text-secondary">TECH STACK</span>
-              <div className="flex flex-wrap gap-2">
-                {selected.tags.map((tag: string) => (
-                  <span key={tag} className="font-mono-data border border-surface-border px-3 py-1 text-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+							<div className="mt-12 grid gap-12 md:grid-cols-3">
+								<div>
+									<span className="font-mono-label mb-3 block text-primary">
+										PROBLEM
+									</span>
+									<p className="font-editorial text-sm text-foreground">
+										{selected.problem}
+									</p>
+								</div>
+								<div>
+									<span className="font-mono-label mb-3 block text-primary">
+										APPROACH
+									</span>
+									<p className="font-editorial text-sm text-foreground">
+										{selected.approach}
+									</p>
+								</div>
+								<div>
+									<span className="font-mono-label mb-3 block text-primary">
+										OUTCOME
+									</span>
+									<p className="font-editorial text-sm text-foreground">
+										{selected.outcome}
+									</p>
+								</div>
+							</div>
 
-            <div className="mt-12 flex gap-6">
-              {selected.liveUrl && (
-                <a
-                  href={selected.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-cursor="external"
-                  className="font-mono-data text-primary transition-opacity hover:opacity-70"
-                >
-                  [↗ LIVE SITE]
-                </a>
-              )}
-              {selected.githubUrl && (
-                <a
-                  href={selected.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-cursor="external"
-                  className="font-mono-data text-foreground transition-opacity hover:opacity-70"
-                >
-                  [⌥ GITHUB]
-                </a>
-              )}
-            </div>
+							<div className="mt-12">
+								<span className="font-mono-label mb-3 block text-text-secondary">
+									TECH STACK
+								</span>
+								<div className="flex flex-wrap gap-2">
+									{selected.tags.map((tag: string) => (
+										<span
+											key={tag}
+											className="font-mono-data border border-surface-border px-3 py-1 text-foreground"
+										>
+											{tag}
+										</span>
+									))}
+								</div>
+							</div>
 
-            {/* Media Gallery */}
-            {selected.media && selected.media.length > 0 && (
-              <div className="mt-20 border-t border-surface-border pt-12">
-                <span className="font-mono-label mb-8 block text-primary">VISUALS</span>
-                <div className="grid gap-8">
-                  {selected.media.map((item, idx) => (
-                    <figure key={idx} className="project-media-reveal group relative overflow-hidden border border-surface-border">
-                      {item.type === "image" ? (
-                        <img 
-                          src={item.url} 
-                          alt={item.caption || `${selected.title} media`} 
-                          loading="lazy"
-                          className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                        />
-                      ) : (
-                        <video 
-                          src={item.url} 
-                          autoPlay 
-                          muted 
-                          loop 
-                          playsInline
-                          className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                        />
-                      )}
-                      {item.caption && (
-                        <figcaption className="font-mono-data border-t border-surface-border bg-surface-strong px-4 py-3 text-[11px] text-muted-foreground">
-                          {item.caption}
-                        </figcaption>
-                      )}
-                    </figure>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
-    </>
-  );
+							<div className="mt-12 flex gap-6">
+								{selected.liveUrl && (
+									<a
+										href={selected.liveUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										data-cursor="external"
+										className="font-mono-data text-primary transition-opacity hover:opacity-70"
+									>
+										[↗ LIVE SITE]
+									</a>
+								)}
+								{selected.githubUrl && (
+									<a
+										href={selected.githubUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										data-cursor="external"
+										className="font-mono-data text-foreground transition-opacity hover:opacity-70"
+									>
+										[⌥ GITHUB]
+									</a>
+								)}
+							</div>
+
+							{/* Media Gallery */}
+							{selected.media && selected.media.length > 0 && (
+								<div className="mt-20 border-t border-surface-border pt-12">
+									<span className="font-mono-label mb-8 block text-primary">
+										VISUALS
+									</span>
+									<div className="grid gap-8">
+										{selected.media.map((item, idx) => (
+											<figure
+												key={idx}
+												className="project-media-reveal group relative overflow-hidden border border-surface-border"
+											>
+												{item.type === "image" ? (
+													<img
+														src={item.url}
+														alt={item.caption || `${selected.title} media`}
+														loading="lazy"
+														className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+													/>
+												) : (
+													<video
+														src={item.url}
+														autoPlay
+														muted
+														loop
+														playsInline
+														className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+													/>
+												)}
+												{item.caption && (
+													<figcaption className="font-mono-data border-t border-surface-border bg-surface-strong px-4 py-3 text-[11px] text-muted-foreground">
+														{item.caption}
+													</figcaption>
+												)}
+											</figure>
+										))}
+									</div>
+								</div>
+							)}
+						</div>
+					</div>,
+					document.body,
+				)}
+		</>
+	);
 };
 
 export default WorkSection;

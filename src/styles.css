@@ -537,6 +537,17 @@ a {
   }
 }
 
+/* Mobile legibility — bump small type to minimum 12px on touch devices */
+@media (max-width: 767px) {
+  .font-mono-label {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+  .font-mono-data {
+    font-size: 13px;
+  }
+}
+
 /* Restore cursor on touch */
 @media (pointer: coarse) {
   .portfolio-theme {
