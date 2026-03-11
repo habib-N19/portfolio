@@ -12,15 +12,12 @@ import SmoothScroll from '#/components/portfolio/SmoothScroll'
 // Lazy loaded heavy components
 const WebGLBackground = lazy(() => import('#/components/portfolio/WebGLBackground'))
 const WorkSection = lazy(() => import('#/components/portfolio/WorkSection'))
-const TimelineSection = lazy(() => import('#/components/portfolio/TimelineSection'))
-const GitHubSection = lazy(() => import('#/components/portfolio/GitHubSection'))
-const ResumeSection = lazy(() => import('#/components/portfolio/ResumeSection'))
 const BlogSection = lazy(() => import('#/components/portfolio/BlogSection'))
 const ContactSection = lazy(() => import('#/components/portfolio/ContactSection'))
 
 export const Route = createFileRoute('/')({ component: PortfolioPage })
 
-const sections = ['hero', 'about', 'work', 'blog', 'timeline', 'github', 'resume', 'contact']
+const sections = ['hero', 'about', 'work', 'blog', 'contact']
 
 function PortfolioPage() {
   const [loading, setLoading] = useState(true)
@@ -107,9 +104,6 @@ function PortfolioPage() {
               <Suspense fallback={null}>
                 <WorkSection />
                 <BlogSection />
-                <TimelineSection />
-                <GitHubSection />
-                <ResumeSection />
                 <ContactSection />
               </Suspense>
             </main>

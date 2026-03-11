@@ -74,13 +74,13 @@ const HeroSection = () => {
         </div>
         <div className="overflow-hidden">
           <SplitText 
-            text="THINGS THAT" 
+            text="INTERFACES THAT" 
             className="hero-line font-display text-[clamp(60px,15vw,220px)] leading-[0.92] text-foreground" 
           />
         </div>
         <div className="overflow-hidden">
           <SplitText 
-            text="DON'T—" 
+            text="FEEL ALIVE." 
             className="hero-line font-display text-[clamp(60px,15vw,220px)] leading-[0.92] text-foreground" 
           />
         </div>
@@ -89,10 +89,10 @@ const HeroSection = () => {
         {/* Meta info */}
         <div className="hero-meta mt-8 space-y-1">
           <p className="font-mono-data text-muted-foreground">
-            Creative Developer · Based in Your City
+            Habiboulaye · Full-Stack Developer
           </p>
           <p className="font-mono-data text-muted-foreground">
-            Currently: <span className="text-primary">Available for opportunities</span>
+            Specializing in <span className="text-primary">React · WebGL · Motion Design</span>
           </p>
         </div>
       </div>
