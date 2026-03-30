@@ -37,10 +37,10 @@ export const identity = {
 			handle: "habib-n19",
 			url: "https://www.linkedin.com/in/habib-n19/",
 		},
-		// readcv: {
-		// 	handle: "yourhandle",
-		// 	url: "https://read.cv/yourhandle",
-		// },
+		readcv: {
+			handle: "yourhandle",
+			url: "https://read.cv/yourhandle",
+		},
 		email: "habiburnabiarafat@gmail.com",
 	},
 

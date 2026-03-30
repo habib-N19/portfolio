@@ -11,15 +11,15 @@ export const Route = createFileRoute("/blog/$slug")({
 		const post = loaderData as BlogPost | undefined;
 		if (!post) {
 			return {
-				meta: [{ title: "Post Not Found | Habiboulaye" }],
+				meta: [{ title: "Post Not Found | habiburnabiarafat" }],
 			};
 		}
 
-		const url = `https://habiboulaye.dev/blog/${post.slug}`;
+		const url = `https://habiburnabiarafat.dev/blog/${post.slug}`;
 
 		return {
 			meta: [
-				{ title: `${post.title} | Habiboulaye` },
+				{ title: `${post.title} | habiburnabiarafat` },
 				{ name: "description", content: post.description },
 				// Open Graph
 				{ property: "og:title", content: post.title },
@@ -51,8 +51,8 @@ export const Route = createFileRoute("/blog/$slug")({
 						url,
 						author: {
 							"@type": "Person",
-							name: "Habiboulaye",
-							url: "https://habiboulaye.dev",
+							name: "habiburnabiarafat",
+							url: "https://habiburnabiarafat.dev",
 						},
 						...(post.image ? { image: post.image } : {}),
 						...(post.tags?.length ? { keywords: post.tags.join(", ") } : {}),

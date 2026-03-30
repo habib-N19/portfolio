@@ -25,15 +25,15 @@ const PERSON_JSONLD = JSON.stringify({
 	"@graph": [
 		{
 			"@type": "Person",
-			name: "Habiboulaye",
-			url: "https://habiboulaye.dev",
+			name: "habiburnabiarafat",
+			url: "https://habiburnabiarafat.dev",
 			jobTitle: "Creative Developer",
 			sameAs: [],
 		},
 		{
 			"@type": "WebSite",
-			name: "Habiboulaye",
-			url: "https://habiboulaye.dev",
+			name: "habiburnabiarafat",
+			url: "https://habiburnabiarafat.dev",
 		},
 	],
 });
@@ -55,21 +55,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Habiboulaye - Creative Developer",
+				title: "habiburnabiarafat - Creative Developer",
 			},
 			{
 				name: "description",
 				content:
-					"Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.",
+					"Portfolio of habiburnabiarafat, a creative developer specializing in performant and aesthetic web experiences.",
 			},
 			{
 				property: "og:title",
-				content: "Habiboulaye - Creative Developer",
+				content: "habiburnabiarafat - Creative Developer",
 			},
 			{
 				property: "og:description",
 				content:
-					"Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.",
+					"Portfolio of habiburnabiarafat, a creative developer specializing in performant and aesthetic web experiences.",
 			},
 			{
 				property: "og:type",
@@ -77,11 +77,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				property: "og:url",
-				content: "https://habiboulaye.dev",
+				content: "https://habiburnabiarafat.dev",
 			},
 			{
 				property: "og:image",
-				content: "https://habiboulaye.dev/logo512.png",
+				content: "https://habiburnabiarafat.dev/logo512.png",
 			},
 			{
 				property: "og:image:width",
@@ -98,16 +98,16 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				name: "twitter:title",
-				content: "Habiboulaye - Creative Developer",
+				content: "habiburnabiarafat - Creative Developer",
 			},
 			{
 				name: "twitter:description",
 				content:
-					"Portfolio of Habiboulaye, a creative developer specializing in performant and aesthetic web experiences.",
+					"Portfolio of habiburnabiarafat, a creative developer specializing in performant and aesthetic web experiences.",
 			},
 			{
 				name: "twitter:image",
-				content: "https://habiboulaye.dev/logo512.png",
+				content: "https://habiburnabiarafat.dev/logo512.png",
 			},
 		],
 		links: [
@@ -117,7 +117,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				rel: "canonical",
-				href: "https://habiboulaye.dev",
+				href: "https://habiburnabiarafat.dev",
 			},
 			// Preload critical fonts (above-fold display + mono)
 			{

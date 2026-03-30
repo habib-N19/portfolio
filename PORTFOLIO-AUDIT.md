@@ -1,4 +1,4 @@
-# Portfolio Audit: Habiboulaye
+# Portfolio Audit: habiburnabiarafat
 
 **Date**: March 9, 2026
 **Stack**: TanStack Start + React + Vite + Tailwind v4 + GSAP + Three.js + Lenis
@@ -228,7 +228,7 @@ This tells the browser to skip layout/paint for off-screen sections. Massive win
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Title | PARTIAL | `Habiboulaye - Creative Developer` -- good but could include a value prop |
+| Title | PARTIAL | `habiburnabiarafat - Creative Developer` -- good but could include a value prop |
 | Description | PARTIAL | Generic. Doesn't mention specific skills or what you build |
 | OG:title | OK | Matches page title |
 | OG:description | OK | Matches meta description |
@@ -262,7 +262,7 @@ This tells the browser to skip layout/paint for off-screen sections. Massive win
 2. **Add canonical URLs** -- Self-referencing on every page.
 3. **Add Twitter Card meta** -- `twitter:card: summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`.
 4. **Create real OG image** -- 1200x630px. Your name, title, and brand aesthetic.
-5. **Fix manifest.json** -- `__root.tsx:76` still says "TanStack App". Change to "Habiboulaye".
+5. **Fix manifest.json** -- `__root.tsx:76` still says "TanStack App". Change to "habiburnabiarafat".
 6. **Add Person JSON-LD** -- On the landing page.
 7. **Add BlogPosting JSON-LD** -- On each blog post page.
 8. **Add an H1 to the hero** -- The hero display text ("BUILDING THINGS THAT DON'T--") should be wrapped in an `<h1>`.
@@ -304,7 +304,7 @@ Every blog post you write should have:
 
 | Element | Example |
 |---------|---------|
-| **Title tag** | `Building a WebGL Background in TanStack Start \| Habiboulaye` (under 60 chars) |
+| **Title tag** | `Building a WebGL Background in TanStack Start \| habiburnabiarafat` (under 60 chars) |
 | **Meta description** | 150-160 chars summarizing the value. Include primary keyword. |
 | **OG:image** | Unique per post. 1200x630. Show title + brand. |
 | **Canonical URL** | `https://yourdomain.com/blog/webgl-background` |
@@ -399,13 +399,13 @@ BUILDING
 INTERFACES THAT
 FEEL ALIVE.
 
-Habiboulaye -- Full-Stack Developer
+habiburnabiarafat -- Full-Stack Developer
 React . WebGL . Motion Design
 ```
 
 **Option B: Direct and specific**
 ```
-HABIBOULAYE
+habiburnabiarafat
 FULL-STACK
 DEVELOPER.
 
@@ -419,7 +419,7 @@ BUILDING
 THINGS THAT
 DON'T EXIST YET.
 
-Habiboulaye . Full-Stack Creative Developer . [Your City]
+habiburnabiarafat . Full-Stack Creative Developer . [Your City]
 Specializing in WebGL, animation systems, and developer tooling.
 ```
 

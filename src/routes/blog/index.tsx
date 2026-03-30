@@ -7,29 +7,29 @@ export const Route = createFileRoute("/blog/")({
 	loader: () => getPublishedPosts(),
 	head: () => ({
 		meta: [
-			{ title: "Writing | Habiboulaye" },
+			{ title: "Writing | habiburnabiarafat" },
 			{
 				name: "description",
 				content:
 					"Articles on creative development, WebGL, animation, architecture decisions, and building for the modern web.",
 			},
-			{ property: "og:title", content: "Writing | Habiboulaye" },
+			{ property: "og:title", content: "Writing | habiburnabiarafat" },
 			{
 				property: "og:description",
 				content:
 					"Articles on creative development, WebGL, animation, architecture decisions, and building for the modern web.",
 			},
 			{ property: "og:type", content: "website" },
-			{ property: "og:url", content: "https://habiboulaye.dev/blog" },
+			{ property: "og:url", content: "https://habiburnabiarafat.dev/blog" },
 			{ name: "twitter:card", content: "summary_large_image" },
-			{ name: "twitter:title", content: "Writing | Habiboulaye" },
+			{ name: "twitter:title", content: "Writing | habiburnabiarafat" },
 			{
 				name: "twitter:description",
 				content:
 					"Articles on creative development, WebGL, animation, architecture decisions, and building for the modern web.",
 			},
 		],
-		links: [{ rel: "canonical", href: "https://habiboulaye.dev/blog" }],
+		links: [{ rel: "canonical", href: "https://habiburnabiarafat.dev/blog" }],
 	}),
 	component: BlogIndexRoute,
 });

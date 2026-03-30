@@ -2,4 +2,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://habiboulaye.dev/sitemap.xml
+Sitemap: https://habiburnabiarafat.dev/sitemap.xml
