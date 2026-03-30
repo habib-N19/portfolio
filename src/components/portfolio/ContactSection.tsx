@@ -1,10 +1,7 @@
 import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import { identity } from "#/data/identity";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap } from "#/lib/gsap-setup";
 
 /** Isolated clock component — only this re-renders every second */
 const LiveClock = () => {

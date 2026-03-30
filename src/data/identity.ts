@@ -7,11 +7,11 @@
 
 export const identity = {
 	name: {
-		first: "HABIBOULAYE",
-		last: "DIALLO",
-		full: "Habiboulaye Diallo",
+		first: "HABIBUR NABI",
+		last: "ARAFAT",
+		full: "Habibur Nabi Arafat",
 		/** Short version for footer / copyright */
-		short: "H. DIALLO",
+		short: "HN. ARAFAT",
 	},
 
 	role: "FULL-STACK DEVELOPER",
@@ -19,7 +19,7 @@ export const identity = {
 	tagline:
 		"I build web applications with React, TypeScript, and WebGL — focused on performance, accessibility, and interfaces worth interacting with.",
 
-	location: "Your City",
+	location: "Dhaka, Bangladesh",
 
 	availability: {
 		open: true,
@@ -30,18 +30,18 @@ export const identity = {
 
 	socials: {
 		github: {
-			handle: "yourhandle",
-			url: "https://github.com/yourhandle",
+			handle: "habib-N19",
+			url: "https://github.com/habib-N19",
 		},
 		linkedin: {
-			handle: "yourhandle",
-			url: "https://linkedin.com/in/yourhandle",
+			handle: "habib-n19",
+			url: "https://www.linkedin.com/in/habib-n19/",
 		},
-		readcv: {
-			handle: "yourhandle",
-			url: "https://read.cv/yourhandle",
-		},
-		email: "hello@yourname.dev",
+		// readcv: {
+		// 	handle: "yourhandle",
+		// 	url: "https://read.cv/yourhandle",
+		// },
+		email: "habiburnabiarafat@gmail.com",
 	},
 
 	/** Resume PDF path (served from /public) */
@@ -61,8 +61,8 @@ export const identity = {
 
 	/** Site metadata */
 	site: {
-		domain: "habiboulaye.dev",
-		url: "https://habiboulaye.dev",
+		domain: "hn-arafat.dev",
+		url: "https://hn-arafat.dev",
 	},
 } as const;
 

@@ -1,12 +1,8 @@
 import { useGSAP } from "@gsap/react";
 import { Link } from "@tanstack/react-router";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState } from "react";
-
-gsap.registerPlugin(ScrollTrigger);
-
 import { blogPosts } from "#/data/blog";
+import { gsap } from "#/lib/gsap-setup";
 
 const BlogSection = () => {
 	const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -94,7 +90,10 @@ const BlogSection = () => {
 			onMouseMove={handleMouseMove}
 		>
 			{/* Ghost number */}
-			<div className="section-ghost-number absolute right-4 top-8 md:right-12" aria-hidden="true">
+			<div
+				className="section-ghost-number absolute right-4 top-8 md:right-12"
+				aria-hidden="true"
+			>
 				007
 			</div>
 
@@ -183,6 +182,8 @@ const BlogSection = () => {
 					<img
 						src={hoveredPost.imageUrl}
 						alt=""
+						width={600}
+						height={400}
 						className="h-full w-full object-cover grayscale"
 						loading="lazy"
 					/>

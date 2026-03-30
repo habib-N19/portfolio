@@ -1,50 +1,31 @@
 import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-gsap.registerPlugin(ScrollTrigger);
-
 import { githubData } from "#/data/github";
 import { type Project, projects } from "#/data/projects";
+import { useEscapeKey } from "#/hooks/useEscapeKey";
+import { useScrollLock } from "#/hooks/useScrollLock";
+import { gsap } from "#/lib/gsap-setup";
 
 const WorkSection = () => {
 	const [selected, setSelected] = useState<Project | null>(null);
 	const containerRef = useRef<HTMLElement>(null);
 
-	// Handle Escape key to close
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && selected) {
-				handleClose();
-			}
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [selected]);
+	const handleClose = useCallback(() => {
+		gsap.to(".project-modal-bg", { opacity: 0, duration: 0.3 });
+		gsap.to(".project-modal-panel", {
+			x: "100%",
+			duration: 0.4,
+			ease: "power3.in",
+			onComplete: () => {
+				setSelected(null);
+				window.history.pushState({}, "", window.location.pathname);
+			},
+		});
+	}, []);
 
-	// Lock scroll when project panel is open
-	useEffect(() => {
-		if (selected) {
-			document.body.style.overflow = "hidden";
-			if (typeof window !== "undefined" && (window as any).lenis) {
-				(window as any).lenis.stop();
-			}
-		} else {
-			document.body.style.overflow = "";
-			if (typeof window !== "undefined" && (window as any).lenis) {
-				(window as any).lenis.start();
-			}
-		}
-
-		return () => {
-			document.body.style.overflow = "";
-			if (typeof window !== "undefined" && (window as any).lenis) {
-				(window as any).lenis.start();
-			}
-		};
-	}, [selected]);
+	useEscapeKey(handleClose, !!selected);
+	useScrollLock(!!selected);
 
 	const openProject = (project: Project) => {
 		setSelected(project);
@@ -72,20 +53,6 @@ const WorkSection = () => {
 		},
 		{ scope: containerRef },
 	);
-
-	const handleClose = () => {
-		// Manually animate out before unmounting
-		gsap.to(".project-modal-bg", { opacity: 0, duration: 0.3 });
-		gsap.to(".project-modal-panel", {
-			x: "100%",
-			duration: 0.4,
-			ease: "power3.in",
-			onComplete: () => {
-				setSelected(null);
-				window.history.pushState({}, "", window.location.pathname);
-			},
-		});
-	};
 
 	// Animate modal in when selected changes
 	useGSAP(
@@ -393,7 +360,11 @@ const WorkSection = () => {
 												{item.type === "image" ? (
 													<img
 														src={item.url}
+														srcSet={`${item.url.replace(/w=\d+/, "w=640")} 640w, ${item.url.replace(/w=\d+/, "w=960")} 960w, ${item.url.replace(/w=\d+/, "w=1280")} 1280w, ${item.url} 1600w`}
+														sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
 														alt={item.caption || `${selected.title} media`}
+														width={1600}
+														height={1000}
 														loading="lazy"
 														className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
 													/>

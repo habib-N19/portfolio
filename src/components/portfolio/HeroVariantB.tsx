@@ -1,10 +1,11 @@
 import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { identity } from "#/data/identity";
 import { type Project, projects } from "#/data/projects";
+import { useEscapeKey } from "#/hooks/useEscapeKey";
+import { useScrollLock } from "#/hooks/useScrollLock";
+import { gsap } from "#/lib/gsap-setup";
 import {
 	ArrowOutIcon,
 	GithubIcon,
@@ -13,8 +14,6 @@ import {
 	ResumeIcon,
 } from "./icons";
 import { SplitText } from "./SplitText";
-
-gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Hero Variant B: "Split Hero"
@@ -89,7 +88,7 @@ const HeroVariantB = () => {
 		window.history.pushState({}, "", `?project=${project.id}`);
 	};
 
-	const closeProject = () => {
+	const closeProject = useCallback(() => {
 		gsap.to(".hero-modal-bg", { opacity: 0, duration: 0.3 });
 		gsap.to(".hero-modal-panel", {
 			x: "100%",
@@ -106,34 +105,10 @@ const HeroVariantB = () => {
 				}
 			},
 		});
-	};
+	}, []);
 
-	// Handle Escape key
-	// biome-ignore lint/correctness/useExhaustiveDependencies: closeProject uses gsap imperative API
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && selectedProject) {
-				closeProject();
-			}
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [selectedProject]);
-
-	// Lock scroll when panel is open
-	useEffect(() => {
-		if (selectedProject) {
-			document.body.style.overflow = "hidden";
-			if (typeof window !== "undefined" && (window as any).lenis) {
-				(window as any).lenis.stop();
-			}
-		} else {
-			document.body.style.overflow = "";
-			if (typeof window !== "undefined" && (window as any).lenis) {
-				(window as any).lenis.start();
-			}
-		}
-	}, [selectedProject]);
+	useEscapeKey(closeProject, !!selectedProject);
+	useScrollLock(!!selectedProject);
 
 	// Animate modal in
 	// biome-ignore lint/correctness/useExhaustiveDependencies: animate on selectedProject change
@@ -407,7 +382,12 @@ const HeroVariantB = () => {
 								{activeProject.media && activeProject.media[0] ? (
 									<img
 										src={activeProject.media[0].url}
+										srcSet={`${activeProject.media[0].url.replace(/w=\d+/, "w=640")} 640w, ${activeProject.media[0].url.replace(/w=\d+/, "w=960")} 960w, ${activeProject.media[0].url.replace(/w=\d+/, "w=1280")} 1280w, ${activeProject.media[0].url} 1600w`}
+										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
 										alt={activeProject.media[0].caption || activeProject.title}
+										width={1600}
+										height={1000}
+										fetchPriority="high"
 										className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
 										style={{
 											filter: "grayscale(30%) contrast(1.05)",
@@ -649,9 +629,13 @@ const HeroVariantB = () => {
 												{item.type === "image" ? (
 													<img
 														src={item.url}
+														srcSet={`${item.url.replace(/w=\d+/, "w=640")} 640w, ${item.url.replace(/w=\d+/, "w=960")} 960w, ${item.url.replace(/w=\d+/, "w=1280")} 1280w, ${item.url} 1600w`}
+														sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
 														alt={
 															item.caption || `${selectedProject.title} media`
 														}
+														width={1600}
+														height={1000}
 														loading="lazy"
 														className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
 													/>

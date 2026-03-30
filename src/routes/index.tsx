@@ -7,20 +7,19 @@ import {
 	useRef,
 	useState,
 } from "react";
-import AboutSection from "#/components/portfolio/AboutSection";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 import FilmGrain from "#/components/portfolio/FilmGrain";
-import FloatingNav from "#/components/portfolio/FloatingNav";
-import HeroVariantA from "#/components/portfolio/HeroVariantA";
-import HeroVariantB from "#/components/portfolio/HeroVariantB";
 import Loader from "#/components/portfolio/Loader";
 import SectionCounter from "#/components/portfolio/SectionCounter";
 import SmoothScroll from "#/components/portfolio/SmoothScroll";
 
-// Lazy loaded heavy components
+// Lazy loaded components — kept out of the critical initial bundle
 const WebGLBackground = lazy(
 	() => import("#/components/portfolio/WebGLBackground"),
 );
+const HeroVariantB = lazy(() => import("#/components/portfolio/HeroVariantB"));
+const FloatingNav = lazy(() => import("#/components/portfolio/FloatingNav"));
+const AboutSection = lazy(() => import("#/components/portfolio/AboutSection"));
 const WorkSection = lazy(() => import("#/components/portfolio/WorkSection"));
 const BlogSection = lazy(() => import("#/components/portfolio/BlogSection"));
 const ContactSection = lazy(
@@ -31,12 +30,9 @@ export const Route = createFileRoute("/")({ component: PortfolioPage });
 
 const sections = ["hero", "about", "work", "blog", "contact"];
 
-type HeroVariant = "A" | "B";
-
 function PortfolioPage() {
 	const [loading, setLoading] = useState(true);
 	const [activeSection, setActiveSection] = useState("hero");
-	const [heroVariant, setHeroVariant] = useState<HeroVariant>("A");
 	const observerRef = useRef<IntersectionObserver | null>(null);
 
 	const onLoadComplete = useCallback(() => {
@@ -109,40 +105,19 @@ function PortfolioPage() {
 				{!loading && (
 					<>
 						<CustomCursor />
-						<FloatingNav activeSection={activeSection} />
+						<Suspense fallback={null}>
+							<FloatingNav activeSection={activeSection} />
+						</Suspense>
 						<SectionCounter activeSection={activeSection} />
 						<FilmGrain />
 
-						{/* ── Hero Variant Toggle (dev tool) ── */}
-						<div className="fixed bottom-6 left-6 z-[90] flex items-center gap-2 rounded border border-surface-border bg-background/90 px-3 py-2 backdrop-blur-md">
-							<span className="font-mono-label text-text-secondary">HERO:</span>
-							<button
-								type="button"
-								onClick={() => setHeroVariant("A")}
-								className={`font-mono-data px-2 py-0.5 transition-colors ${
-									heroVariant === "A"
-										? "bg-primary text-background"
-										: "text-text-secondary hover:text-foreground"
-								}`}
-							>
-								A
-							</button>
-							<button
-								type="button"
-								onClick={() => setHeroVariant("B")}
-								className={`font-mono-data px-2 py-0.5 transition-colors ${
-									heroVariant === "B"
-										? "bg-primary text-background"
-										: "text-text-secondary hover:text-foreground"
-								}`}
-							>
-								B
-							</button>
-						</div>
-
 						<main>
-							{heroVariant === "A" ? <HeroVariantA /> : <HeroVariantB />}
-							<AboutSection />
+							<Suspense fallback={null}>
+								<HeroVariantB />
+							</Suspense>
+							<Suspense fallback={null}>
+								<AboutSection />
+							</Suspense>
 							<Suspense fallback={null}>
 								<WorkSection />
 								<BlogSection />
