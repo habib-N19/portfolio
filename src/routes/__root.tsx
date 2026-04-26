@@ -1,14 +1,12 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect, useState } from "react";
 import { getLocale } from "#/paraglide/runtime";
 import PostHogProvider from "../integrations/posthog/provider";
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
 
@@ -178,24 +176,66 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<PostHogProvider>
 					<TanStackQueryProvider>
 						{children}
-						{import.meta.env.DEV && (
-							<TanStackDevtools
-								config={{
-									position: "bottom-right",
-								}}
-								plugins={[
-									{
-										name: "Tanstack Router",
-										render: <TanStackRouterDevtoolsPanel />,
-									},
-									TanStackQueryDevtools,
-								]}
-							/>
-						)}
+						{import.meta.env.DEV && <DevtoolsMount />}
 					</TanStackQueryProvider>
 				</PostHogProvider>
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function DevtoolsMount() {
+	const [state, setState] = useState<{
+		TanStackDevtools:
+			| (typeof import("@tanstack/react-devtools"))["TanStackDevtools"]
+			| null;
+		RouterPanel:
+			| (typeof import("@tanstack/react-router-devtools"))["TanStackRouterDevtoolsPanel"]
+			| null;
+		queryDevtools: unknown;
+	}>({
+		TanStackDevtools: null,
+		RouterPanel: null,
+		queryDevtools: null,
+	});
+
+	useEffect(() => {
+		let mounted = true;
+		void Promise.all([
+			import("@tanstack/react-devtools"),
+			import("@tanstack/react-router-devtools"),
+			import("../integrations/tanstack-query/devtools"),
+		]).then(([reactDevtools, routerDevtools, queryDevtools]) => {
+			if (!mounted) return;
+			setState({
+				TanStackDevtools: reactDevtools.TanStackDevtools,
+				RouterPanel: routerDevtools.TanStackRouterDevtoolsPanel,
+				queryDevtools: queryDevtools.default,
+			});
+		});
+
+		return () => {
+			mounted = false;
+		};
+	}, []);
+
+	if (!state.TanStackDevtools || !state.RouterPanel || !state.queryDevtools) {
+		return null;
+	}
+
+	return (
+		<state.TanStackDevtools
+			config={{
+				position: "bottom-right",
+			}}
+			plugins={[
+				{
+					name: "Tanstack Router",
+					render: <state.RouterPanel />,
+				},
+				state.queryDevtools,
+			]}
+		/>
 	);
 }

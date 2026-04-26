@@ -25,26 +25,26 @@ const Loader = ({ onComplete }: { onComplete: () => void }) => {
 		});
 
 		if (visited) {
-			// 0.3s simple fade for returning visits
+			// very short fade for returning visits
 			// setCount(100);
 			tl.to(containerRef.current, {
 				opacity: 0,
-				duration: 0.3,
+				duration: 0.18,
 				ease: "power2.inOut",
 			});
 		} else {
-			// 1.6s counter scrub
+			// short first-load reveal
 			const counter = { val: 0 };
 			tl.to(counter, {
 				val: 100,
-				duration: 1.6,
+				duration: 0.8,
 				ease: "power3.out",
 				// onUpdate: () => setCount(Math.round(counter.val)),
 			})
 				// Iris wipe (loader shrinks into center circle to reveal site)
 				.to(containerRef.current, {
 					clipPath: "circle(0% at 50% 50%)",
-					duration: 0.8,
+					duration: 0.45,
 					ease: "power3.inOut",
 				});
 		}

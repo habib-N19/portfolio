@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
+import { env } from "#/env";
 
 interface PostHogProviderProps {
 	children: ReactNode;
@@ -12,18 +13,26 @@ interface PostHogProviderProps {
 export default function PostHogProvider({ children }: PostHogProviderProps) {
 	const initialized = useRef(false);
 
+	const key = env.VITE_POSTHOG_KEY;
+	const host = env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
+	const hasUsableKey =
+		typeof key === "string" &&
+		key.trim().length > 0 &&
+		!key.includes("xxx") &&
+		key.startsWith("phc_");
+
 	useEffect(() => {
 		if (initialized.current) return;
 		if (typeof window === "undefined") return;
-		if (!import.meta.env.VITE_POSTHOG_KEY) return;
+		if (!hasUsableKey) return;
+		const safeKey = key as string;
 
 		initialized.current = true;
 
 		const initPostHog = async () => {
 			const { default: posthog } = await import("posthog-js");
-			posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
-				api_host:
-					import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com",
+			posthog.init(safeKey, {
+				api_host: host,
 				person_profiles: "identified_only",
 				capture_pageview: false,
 				defaults: "2025-11-30",
@@ -37,7 +46,7 @@ export default function PostHogProvider({ children }: PostHogProviderProps) {
 			// Fallback: defer by 3 seconds
 			setTimeout(() => initPostHog(), 3000);
 		}
-	}, []);
+	}, [hasUsableKey, key, host]);
 
 	// No PostHogProvider wrapper needed — posthog-js works globally once init'd
 	return <>{children}</>;

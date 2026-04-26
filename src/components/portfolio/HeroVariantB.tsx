@@ -6,6 +6,8 @@ import { type Project, projects } from "#/data/projects";
 import { useEscapeKey } from "#/hooks/useEscapeKey";
 import { useScrollLock } from "#/hooks/useScrollLock";
 import { gsap } from "#/lib/gsap-setup";
+import { buildUnsplashSrcSet, buildUnsplashUrl } from "#/lib/image";
+import { useMotionTier } from "#/lib/motion-context";
 import {
 	ArrowOutIcon,
 	GithubIcon,
@@ -27,15 +29,18 @@ const featuredProjects = projects
 	.slice(0, 3);
 
 const HeroVariantB = () => {
+	const motionTier = useMotionTier();
 	const [showScroll, setShowScroll] = useState(true);
 	const [activeProjectIdx, setActiveProjectIdx] = useState(0);
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+	const modalMediaDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const containerRef = useRef<HTMLElement>(null);
 	const tlRef = useRef<gsap.core.Timeline>(null);
 	const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const activeProject = featuredProjects[activeProjectIdx] || projects[0];
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: animation should re-run on project changes
 	useEffect(() => {
 		const scrollHandler = () => {
 			if (window.scrollY > 50) setShowScroll(false);
@@ -65,20 +70,41 @@ const HeroVariantB = () => {
 		}, 5000);
 	}, []);
 
-	// Animate project image transition
-	// biome-ignore lint/correctness/useExhaustiveDependencies: re-run animation when project index changes
 	useEffect(() => {
-		gsap.fromTo(
-			".hero-project-image",
-			{ opacity: 0, scale: 1.05 },
-			{ opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" },
-		);
-		gsap.fromTo(
-			".hero-project-info",
-			{ y: 10, opacity: 0 },
-			{ y: 0, opacity: 1, duration: 0.4, ease: "power2.out", delay: 0.15 },
-		);
-	}, [activeProjectIdx]);
+		if (motionTier === "minimal") return;
+		const timeoutMs = motionTier === "reduced" ? 80 : 180;
+		const timeoutId = setTimeout(() => {
+			gsap.fromTo(
+				".hero-project-image",
+				{ opacity: 0, scale: 1.05 },
+				{ opacity: 1, scale: 1, duration: motionTier === "reduced" ? 0.3 : 0.6, ease: "power2.out" },
+			);
+			gsap.fromTo(
+				".hero-project-info",
+				{ y: 10, opacity: 0 },
+				{
+					y: 0,
+					opacity: 1,
+					duration: motionTier === "reduced" ? 0.21 : 0.42,
+					ease: "power2.out",
+					delay: 0.1,
+				},
+			);
+		}, timeoutMs);
+
+		return () => {
+			clearTimeout(timeoutId);
+		};
+	}, [activeProjectIdx, motionTier]);
+
+	useEffect(() => {
+		return () => {
+			if (modalMediaDelayRef.current) {
+				clearTimeout(modalMediaDelayRef.current);
+				modalMediaDelayRef.current = null;
+			}
+		};
+	}, []);
 
 	// ── Project detail panel ──
 	const openProject = (project: Project) => {
@@ -89,15 +115,16 @@ const HeroVariantB = () => {
 	};
 
 	const closeProject = useCallback(() => {
-		gsap.to(".hero-modal-bg", { opacity: 0, duration: 0.3 });
+		const modalDur = motionTier === "reduced" ? 0.15 : 0.3;
+		const panelDur = motionTier === "reduced" ? 0.2 : 0.4;
+		gsap.to(".hero-modal-bg", { opacity: 0, duration: modalDur });
 		gsap.to(".hero-modal-panel", {
 			x: "100%",
-			duration: 0.4,
+			duration: panelDur,
 			ease: "power3.in",
 			onComplete: () => {
 				setSelectedProject(null);
 				window.history.pushState({}, "", window.location.pathname);
-				// Restart autoplay
 				if (featuredProjects.length > 1) {
 					autoplayRef.current = setInterval(() => {
 						setActiveProjectIdx((prev) => (prev + 1) % featuredProjects.length);
@@ -105,115 +132,128 @@ const HeroVariantB = () => {
 				}
 			},
 		});
-	}, []);
+	}, [motionTier]);
 
 	useEscapeKey(closeProject, !!selectedProject);
 	useScrollLock(!!selectedProject);
 
-	// Animate modal in
 	// biome-ignore lint/correctness/useExhaustiveDependencies: animate on selectedProject change
 	useEffect(() => {
 		if (selectedProject) {
+			const isReduced = motionTier === "reduced";
+			const bgDur = isReduced ? 0.15 : 0.3;
+			const panelDur = isReduced ? 0.25 : 0.5;
+
 			gsap.fromTo(
 				".hero-modal-bg",
 				{ opacity: 0 },
-				{ opacity: 1, duration: 0.3 },
+				{ opacity: 1, duration: bgDur },
 			);
 			gsap.fromTo(
 				".hero-modal-panel",
 				{ x: "100%" },
-				{ x: 0, duration: 0.5, ease: "power3.out" },
+				{ x: 0, duration: panelDur, ease: "power3.out" },
 			);
 
-			// Media reveal animations
-			setTimeout(() => {
-				const mediaElements = gsap.utils.toArray(".hero-project-media-reveal");
-				for (const [i, el] of mediaElements.entries()) {
-					gsap.fromTo(
-						el as HTMLElement,
-						{ y: 40, opacity: 0 },
-						{
-							scrollTrigger: {
-								trigger: el as HTMLElement,
-								scroller: ".hero-modal-panel",
-								start: "top 95%",
-								toggleActions: "play none none reverse",
-							},
-							y: 0,
-							opacity: 1,
-							duration: 0.8,
-							ease: "power2.out",
-							delay: i * 0.1,
-						},
-					);
+			if (motionTier !== "minimal") {
+				if (modalMediaDelayRef.current) {
+					clearTimeout(modalMediaDelayRef.current);
 				}
-			}, 400);
+				modalMediaDelayRef.current = setTimeout(() => {
+					const mediaElements = gsap.utils.toArray(".hero-project-media-reveal");
+					for (const [i, el] of mediaElements.entries()) {
+						gsap.fromTo(
+							el as HTMLElement,
+							{ y: isReduced ? 15 : 40, opacity: 0 },
+							{
+								scrollTrigger: {
+									trigger: el as HTMLElement,
+									scroller: ".hero-modal-panel",
+									start: "top 95%",
+									toggleActions: "play none none reverse",
+								},
+								y: 0,
+								opacity: 1,
+								duration: isReduced ? 0.4 : 0.8,
+								ease: "power2.out",
+								delay: isReduced ? i * 0.03 : i * 0.1,
+							},
+						);
+					}
+					modalMediaDelayRef.current = null;
+				}, isReduced ? 150 : 400);
+			}
 		}
-	}, [selectedProject]);
+
+		return () => {
+			if (modalMediaDelayRef.current) {
+				clearTimeout(modalMediaDelayRef.current);
+				modalMediaDelayRef.current = null;
+			}
+		};
+	}, [selectedProject, motionTier]);
 
 	useGSAP(
 		() => {
-			const tl = gsap.timeline({ delay: 0.2 });
+			if (motionTier === "minimal") return;
+
+			const isReduced = motionTier === "reduced";
+			const tl = gsap.timeline({ delay: isReduced ? 0.05 : 0.2 });
 			tlRef.current = tl;
 
-			// 1. Name rises in
+			const charDur = isReduced ? 0.5 : 1.2;
+			const charStagger = isReduced ? 0.01 : 0.035;
+
 			tl.from(".hero-name .split-char", {
-				y: 150,
+				y: isReduced ? 40 : 150,
 				opacity: 0,
-				duration: 1.2,
-				stagger: 0.035,
+				duration: charDur,
+				stagger: charStagger,
 				ease: "power4.out",
 			});
 
-			// 2. Role + meta
 			tl.from(
 				".hero-identity-meta",
 				{
-					y: 25,
+					y: isReduced ? 10 : 25,
 					opacity: 0,
-					duration: 0.8,
-					stagger: 0.1,
+					duration: isReduced ? 0.4 : 0.8,
+					stagger: isReduced ? 0.03 : 0.1,
 					ease: "power3.out",
 				},
-				"-=0.5",
+				isReduced ? "-=0.2" : "-=0.5",
 			);
 
-			// 3. Left-side links
 			tl.from(
 				".hero-left-link",
 				{
-					y: 15,
+					y: isReduced ? 5 : 15,
 					opacity: 0,
-					duration: 0.5,
-					stagger: 0.06,
+					duration: isReduced ? 0.25 : 0.5,
+					stagger: isReduced ? 0.02 : 0.06,
 					ease: "power2.out",
 				},
-				"-=0.3",
+				isReduced ? "-=0.15" : "-=0.3",
 			);
 
-			// 4. Right side: project card
 			tl.from(
 				".hero-project-card",
 				{
-					x: 60,
+					x: isReduced ? 20 : 60,
 					opacity: 0,
-					duration: 1,
+					duration: isReduced ? 0.4 : 1,
 					ease: "power3.out",
 				},
-				"-=0.8",
+				isReduced ? "-=0.2" : "-=0.8",
 			);
 
-			// 5. Scroll indicator
 			tl.from(
 				".hero-scroll",
-				{
-					opacity: 0,
-					duration: 1,
-				},
-				"-=0.4",
+				{ opacity: 0, duration: isReduced ? 0.4 : 1 },
+				isReduced ? "-=0.2" : "-=0.4",
 			);
 		},
-		{ scope: containerRef },
+		{ scope: containerRef, dependencies: [motionTier] },
 	);
 
 	return (
@@ -223,14 +263,6 @@ const HeroVariantB = () => {
 				ref={containerRef}
 				className="relative flex min-h-screen flex-col justify-center px-6 py-16 md:px-12 lg:px-20"
 			>
-				{/* Ghost number — hidden on mobile to avoid overlapping name */}
-				<div
-					className="section-ghost-number absolute right-4 top-8 hidden md:block md:right-12"
-					aria-hidden="true"
-				>
-					001
-				</div>
-
 				<div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16 xl:gap-24">
 					{/* ── Left: Identity ── */}
 					<div>
@@ -362,7 +394,7 @@ const HeroVariantB = () => {
 							{identity.techStack.slice(0, 6).map((tech) => (
 								<span
 									key={tech}
-									className="hero-left-link font-mono-data border border-surface-border px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-primary/30 hover:text-foreground"
+									className="hero-left-link font-mono-data border border-surface-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
 								>
 									{tech}
 								</span>
@@ -381,12 +413,12 @@ const HeroVariantB = () => {
 							<div className="hero-project-image aspect-[16/10] w-full overflow-hidden border-b border-surface-border">
 								{activeProject.media && activeProject.media[0] ? (
 									<img
-										src={activeProject.media[0].url}
-										srcSet={`${activeProject.media[0].url.replace(/w=\d+/, "w=640")} 640w, ${activeProject.media[0].url.replace(/w=\d+/, "w=960")} 960w, ${activeProject.media[0].url.replace(/w=\d+/, "w=1280")} 1280w, ${activeProject.media[0].url} 1600w`}
-										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
+										src={buildUnsplashUrl(activeProject.media[0].url, 960)}
+										srcSet={buildUnsplashSrcSet(activeProject.media[0].url, [480, 720, 960, 1280])}
+										sizes="(max-width: 640px) 100vw, (max-width: 1200px) 70vw, 960px"
 										alt={activeProject.media[0].caption || activeProject.title}
-										width={1600}
-										height={1000}
+										width={960}
+										height={600}
 										fetchPriority="high"
 										className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
 										style={{
@@ -406,9 +438,9 @@ const HeroVariantB = () => {
 							<div className="hero-project-info p-5 md:p-6">
 								<div className="flex items-start justify-between gap-4">
 									<div className="min-w-0">
-										<span className="font-mono-label text-text-secondary">
-											[{activeProject.number}] &mdash; {activeProject.role}
-										</span>
+						<span className="font-mono-label text-muted-foreground">
+							[{activeProject.number}] &mdash; {activeProject.role}
+						</span>
 										<h2 className="font-display mt-1 text-[clamp(24px,3vw,40px)] leading-[0.95] text-foreground">
 											{activeProject.title}
 										</h2>
@@ -416,7 +448,7 @@ const HeroVariantB = () => {
 											{activeProject.shortDesc}
 										</p>
 									</div>
-									<span className="font-mono-data shrink-0 text-text-secondary">
+									<span className="font-mono-data shrink-0 text-muted-foreground">
 										{activeProject.year}
 									</span>
 								</div>
@@ -426,8 +458,8 @@ const HeroVariantB = () => {
 									{activeProject.tags.slice(0, 4).map((tag) => (
 										<span
 											key={tag}
-											className="font-mono-data border border-surface-border px-2 py-0.5 text-[11px] text-text-secondary"
-										>
+										className="font-mono-data border border-surface-border px-2 py-0.5 text-[11px] text-muted-foreground"
+									>
 											{tag}
 										</span>
 									))}
@@ -628,14 +660,14 @@ const HeroVariantB = () => {
 											>
 												{item.type === "image" ? (
 													<img
-														src={item.url}
-														srcSet={`${item.url.replace(/w=\d+/, "w=640")} 640w, ${item.url.replace(/w=\d+/, "w=960")} 960w, ${item.url.replace(/w=\d+/, "w=1280")} 1280w, ${item.url} 1600w`}
-														sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
+														src={buildUnsplashUrl(item.url, 960)}
+														srcSet={buildUnsplashSrcSet(item.url, [480, 720, 960, 1280])}
+														sizes="(max-width: 640px) 100vw, (max-width: 1200px) 70vw, 960px"
 														alt={
 															item.caption || `${selectedProject.title} media`
 														}
-														width={1600}
-														height={1000}
+														width={960}
+														height={600}
 														loading="lazy"
 														className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
 													/>

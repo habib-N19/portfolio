@@ -3,33 +3,35 @@ import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { blogPosts } from "#/data/blog";
 import { gsap } from "#/lib/gsap-setup";
+import { useMotionTier } from "#/lib/motion-context";
 
 const BlogSection = () => {
+	const motionTier = useMotionTier();
 	const [hoveredId, setHoveredId] = useState<string | null>(null);
 	const sectionRef = useRef<HTMLElement>(null);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
 
 	const hoveredPost = blogPosts.find((p) => p.id === hoveredId);
 
-	// GSAP quickTo for smooth mouse follow
 	const xTo = useRef<gsap.QuickToFunc | null>(null);
 	const yTo = useRef<gsap.QuickToFunc | null>(null);
 
 	useGSAP(
 		() => {
+			if (motionTier === "minimal") return;
+			const trackDur = motionTier === "reduced" ? 0.2 : 0.4;
 			xTo.current = gsap.quickTo(imageContainerRef.current, "left", {
-				duration: 0.4,
+				duration: trackDur,
 				ease: "power3",
 			});
 			yTo.current = gsap.quickTo(imageContainerRef.current, "top", {
-				duration: 0.4,
+				duration: trackDur,
 				ease: "power3",
 			});
 
-			// Initial setup for image container
 			gsap.set(imageContainerRef.current, { opacity: 0, scale: 0.92 });
 		},
-		{ scope: sectionRef },
+		{ scope: sectionRef, dependencies: [motionTier] },
 	);
 
 	const handleMouseMove = (e: React.MouseEvent) => {
@@ -41,23 +43,26 @@ const BlogSection = () => {
 
 	useGSAP(
 		() => {
+			if (motionTier === "minimal") return;
+			const isReduced = motionTier === "reduced";
 			const elements = gsap.utils.toArray(".blog-reveal");
 			elements.forEach((el, i) => {
 				gsap.from(el as HTMLElement, {
 					scrollTrigger: {
 						trigger: el as HTMLElement,
 						start: "top 85%",
-						toggleActions: "play none none reverse",
+						toggleActions: "play none none none",
+						once: true,
 					},
-					y: 20,
+					y: isReduced ? 8 : 20,
 					opacity: 0,
-					duration: 0.5,
+					duration: isReduced ? 0.25 : 0.5,
 					ease: "power2.out",
-					delay: i * 0.08,
+					delay: isReduced ? i * 0.02 : i * 0.08,
 				});
 			});
 		},
-		{ scope: sectionRef },
+		{ scope: sectionRef, dependencies: [motionTier] },
 	);
 
 	// Handle hovered ID image animation
@@ -89,14 +94,6 @@ const BlogSection = () => {
 			className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20"
 			onMouseMove={handleMouseMove}
 		>
-			{/* Ghost number */}
-			<div
-				className="section-ghost-number absolute right-4 top-8 md:right-12"
-				aria-hidden="true"
-			>
-				007
-			</div>
-
 			<h2 className="blog-reveal font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
 				WRITING
 			</h2>

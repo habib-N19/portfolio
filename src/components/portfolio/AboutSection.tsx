@@ -6,6 +6,7 @@ import { timelineData } from "#/data/timeline";
 import { useEscapeKey } from "#/hooks/useEscapeKey";
 import { useScrollLock } from "#/hooks/useScrollLock";
 import { gsap } from "#/lib/gsap-setup";
+import { useMotionTier } from "#/lib/motion-context";
 
 const skills = {
 	Languages: ["TypeScript", "Python", "GLSL", "HTML/CSS"],
@@ -15,18 +16,21 @@ const skills = {
 };
 
 const AboutSection = () => {
+	const motionTier = useMotionTier();
 	const containerRef = useRef<HTMLElement>(null);
 	const [isResumeOpen, setIsResumeOpen] = useState(false);
 
 	const closeResume = useCallback(() => {
-		gsap.to(".resume-modal-bg", { opacity: 0, duration: 0.3 });
+		const dur = motionTier === "reduced" ? 0.15 : 0.3;
+		const panelDur = motionTier === "reduced" ? 0.2 : 0.4;
+		gsap.to(".resume-modal-bg", { opacity: 0, duration: dur });
 		gsap.to(".resume-modal-panel", {
 			y: "100%",
-			duration: 0.4,
+			duration: panelDur,
 			ease: "power3.in",
 			onComplete: () => setIsResumeOpen(false),
 		});
-	}, []);
+	}, [motionTier]);
 
 	useEscapeKey(closeResume, isResumeOpen);
 	useScrollLock(isResumeOpen);
@@ -37,42 +41,46 @@ const AboutSection = () => {
 	useGSAP(
 		() => {
 			if (isResumeOpen) {
+				const bgDur = motionTier === "reduced" ? 0.15 : 0.3;
+				const panelDur = motionTier === "reduced" ? 0.25 : 0.5;
 				gsap.fromTo(
 					".resume-modal-bg",
 					{ opacity: 0 },
-					{ opacity: 1, duration: 0.3 },
+					{ opacity: 1, duration: bgDur },
 				);
 				gsap.fromTo(
 					".resume-modal-panel",
 					{ y: "100%" },
-					{ y: 0, duration: 0.5, ease: "power3.out" },
+					{ y: 0, duration: panelDur, ease: "power3.out" },
 				);
 			}
 		},
-		{ dependencies: [isResumeOpen] },
+		{ dependencies: [isResumeOpen, motionTier] },
 	);
 
 	useGSAP(
 		() => {
-			// Select all elements with the reveal attribute
+			if (motionTier === "minimal") return;
+			const isReduced = motionTier === "reduced";
 			const elements = gsap.utils.toArray(".about-reveal");
 
 			elements.forEach((el, i) => {
 				gsap.from(el as HTMLElement, {
 					scrollTrigger: {
 						trigger: el as HTMLElement,
-						start: "top 85%", // Trigger when the top of the element hits 85% of viewport
-						toggleActions: "play none none reverse", // Play on enter, reverse on exit
+						start: "top 85%",
+						toggleActions: "play none none none",
+						once: true,
 					},
-					y: 40,
+					y: isReduced ? 15 : 40,
 					opacity: 0,
-					duration: 1,
+					duration: isReduced ? 0.5 : 1,
 					ease: "power2.out",
-					delay: i * 0.1, // Stagger slightly based on DOM order
+					delay: isReduced ? i * 0.03 : i * 0.1,
 				});
 			});
 		},
-		{ scope: containerRef },
+		{ scope: containerRef, dependencies: [motionTier] },
 	);
 
 	return (
@@ -82,14 +90,6 @@ const AboutSection = () => {
 				ref={containerRef}
 				className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20"
 			>
-				{/* Ghost number */}
-				<div
-					className="section-ghost-number absolute right-4 top-8 md:right-12"
-					aria-hidden="true"
-				>
-					002
-				</div>
-
 				<div className="grid gap-16 lg:grid-cols-[1fr_1.2fr] lg:gap-24">
 					{/* Portrait placeholder */}
 					<div className="about-reveal">

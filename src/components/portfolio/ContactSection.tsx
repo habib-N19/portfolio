@@ -2,6 +2,7 @@ import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState } from "react";
 import { identity } from "#/data/identity";
 import { gsap } from "#/lib/gsap-setup";
+import { useMotionTier } from "#/lib/motion-context";
 
 /** Isolated clock component — only this re-renders every second */
 const LiveClock = () => {
@@ -29,10 +30,13 @@ const LiveClock = () => {
 };
 
 const ContactSection = () => {
+	const motionTier = useMotionTier();
 	const containerRef = useRef<HTMLElement>(null);
 
 	useGSAP(
 		() => {
+			if (motionTier === "minimal") return;
+			const isReduced = motionTier === "reduced";
 			const elements = gsap.utils.toArray(".contact-reveal");
 
 			elements.forEach((el, i) => {
@@ -40,17 +44,18 @@ const ContactSection = () => {
 					scrollTrigger: {
 						trigger: el as HTMLElement,
 						start: "top 85%",
-						toggleActions: "play none none reverse",
+						toggleActions: "play none none none",
+						once: true,
 					},
-					y: 30,
+					y: isReduced ? 10 : 30,
 					opacity: 0,
-					duration: 0.8,
+					duration: isReduced ? 0.4 : 0.8,
 					ease: "power2.out",
-					delay: i * 0.15,
+					delay: isReduced ? i * 0.05 : i * 0.15,
 				});
 			});
 		},
-		{ scope: containerRef },
+		{ scope: containerRef, dependencies: [motionTier] },
 	);
 
 	return (
@@ -59,14 +64,6 @@ const ContactSection = () => {
 			ref={containerRef}
 			className="relative flex min-h-screen flex-col justify-center px-6 py-32 md:px-12 lg:px-20"
 		>
-			{/* Ghost number */}
-			<div
-				className="section-ghost-number absolute right-4 top-8 md:right-12"
-				aria-hidden="true"
-			>
-				008
-			</div>
-
 			<div className="grid gap-16 lg:grid-cols-2">
 				{/* Left: Statement */}
 				<div className="contact-reveal">

@@ -9,11 +9,15 @@ import {
 } from "react";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 import FilmGrain from "#/components/portfolio/FilmGrain";
+import { LazySection } from "#/components/portfolio/LazySection";
 import Loader from "#/components/portfolio/Loader";
-import SectionCounter from "#/components/portfolio/SectionCounter";
 import SmoothScroll from "#/components/portfolio/SmoothScroll";
+import { MotionProvider } from "#/lib/motion-context";
+import {
+	getClientPerfSignals,
+	shouldEnableWebGLBackground,
+} from "#/lib/performance";
 
-// Lazy loaded components — kept out of the critical initial bundle
 const WebGLBackground = lazy(
 	() => import("#/components/portfolio/WebGLBackground"),
 );
@@ -30,25 +34,39 @@ export const Route = createFileRoute("/")({ component: PortfolioPage });
 
 const sections = ["hero", "about", "work", "blog", "contact"];
 
-function PortfolioPage() {
-	const [loading, setLoading] = useState(true);
+export function PortfolioPage() {
+	const [showLoader, setShowLoader] = useState(false);
+	const [showWebGL, setShowWebGL] = useState(false);
 	const [activeSection, setActiveSection] = useState("hero");
 	const observerRef = useRef<IntersectionObserver | null>(null);
 
 	const onLoadComplete = useCallback(() => {
-		setLoading(false);
+		setShowLoader(false);
 	}, []);
 
 	useEffect(() => {
-		const visited = sessionStorage.getItem("portfolio-visited");
-		if (visited) {
-			setLoading(false);
+		const signals = getClientPerfSignals();
+		const visited = sessionStorage.getItem("portfolio-visited") === "true";
+
+		if (!visited && !signals.prefersReducedMotion) {
+			setShowLoader(true);
 		}
+
+		if (!shouldEnableWebGLBackground(signals)) return;
+
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+		if ("requestIdleCallback" in window) {
+			requestIdleCallback(() => setShowWebGL(true), { timeout: 1500 });
+		} else {
+			timeoutId = setTimeout(() => setShowWebGL(true), 800);
+		}
+
+		return () => {
+			if (timeoutId) clearTimeout(timeoutId);
+		};
 	}, []);
 
 	useEffect(() => {
-		if (loading) return;
-
 		let maxIntersectionRatio = 0;
 		let mostVisibleSection = "";
 
@@ -63,12 +81,12 @@ function PortfolioPage() {
 					}
 				}
 
-				// Only update if we found a clearly visible section and it's different
-				if (mostVisibleSection && mostVisibleSection !== activeSection) {
-					setActiveSection(mostVisibleSection);
+				if (mostVisibleSection) {
+					setActiveSection((prev) =>
+						prev === mostVisibleSection ? prev : mostVisibleSection,
+					);
 				}
 
-				// Reset for next batch of entries
 				maxIntersectionRatio = 0;
 			},
 			{ threshold: [0.2, 0.4, 0.6, 0.8], rootMargin: "-10% 0px -20% 0px" },
@@ -79,10 +97,9 @@ function PortfolioPage() {
 			if (el) observerRef.current?.observe(el);
 		}
 
-		// Fallback for returning to absolute top
 		const handleScroll = () => {
 			if (window.scrollY < 100) {
-				setActiveSection("hero");
+				setActiveSection((prev) => (prev === "hero" ? prev : "hero"));
 			}
 		};
 		window.addEventListener("scroll", handleScroll, { passive: true });
@@ -91,42 +108,53 @@ function PortfolioPage() {
 			observerRef.current?.disconnect();
 			window.removeEventListener("scroll", handleScroll);
 		};
-	}, [loading]);
+	}, []);
 
 	return (
-		<SmoothScroll>
-			<div className="portfolio-theme">
-				<Suspense fallback={null}>
-					<WebGLBackground />
-				</Suspense>
-
-				{loading && <Loader onComplete={onLoadComplete} />}
-
-				{!loading && (
-					<>
-						<CustomCursor />
+		<MotionProvider>
+			<SmoothScroll>
+				<div className="portfolio-theme">
+					{showWebGL && (
 						<Suspense fallback={null}>
-							<FloatingNav activeSection={activeSection} />
+							<WebGLBackground />
 						</Suspense>
-						<SectionCounter activeSection={activeSection} />
-						<FilmGrain />
+					)}
 
-						<main>
-							<Suspense fallback={null}>
-								<HeroVariantB />
-							</Suspense>
+					<CustomCursor />
+					<Suspense fallback={null}>
+						<FloatingNav activeSection={activeSection} />
+					</Suspense>
+					<FilmGrain />
+
+					<main>
+						<Suspense fallback={null}>
+							<HeroVariantB />
+						</Suspense>
+						<LazySection id="about">
 							<Suspense fallback={null}>
 								<AboutSection />
 							</Suspense>
+						</LazySection>
+						<LazySection id="work">
 							<Suspense fallback={null}>
 								<WorkSection />
+							</Suspense>
+						</LazySection>
+						<LazySection id="blog">
+							<Suspense fallback={null}>
 								<BlogSection />
+							</Suspense>
+						</LazySection>
+						<LazySection id="contact">
+							<Suspense fallback={null}>
 								<ContactSection />
 							</Suspense>
-						</main>
-					</>
-				)}
-			</div>
-		</SmoothScroll>
+						</LazySection>
+					</main>
+
+					{showLoader && <Loader onComplete={onLoadComplete} />}
+				</div>
+			</SmoothScroll>
+		</MotionProvider>
 	);
 }

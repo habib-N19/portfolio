@@ -6,23 +6,27 @@ import { type Project, projects } from "#/data/projects";
 import { useEscapeKey } from "#/hooks/useEscapeKey";
 import { useScrollLock } from "#/hooks/useScrollLock";
 import { gsap } from "#/lib/gsap-setup";
+import { useMotionTier } from "#/lib/motion-context";
 
 const WorkSection = () => {
+	const motionTier = useMotionTier();
 	const [selected, setSelected] = useState<Project | null>(null);
 	const containerRef = useRef<HTMLElement>(null);
 
 	const handleClose = useCallback(() => {
-		gsap.to(".project-modal-bg", { opacity: 0, duration: 0.3 });
+		const dur = motionTier === "reduced" ? 0.15 : 0.3;
+		const panelDur = motionTier === "reduced" ? 0.2 : 0.4;
+		gsap.to(".project-modal-bg", { opacity: 0, duration: dur });
 		gsap.to(".project-modal-panel", {
 			x: "100%",
-			duration: 0.4,
+			duration: panelDur,
 			ease: "power3.in",
 			onComplete: () => {
 				setSelected(null);
 				window.history.pushState({}, "", window.location.pathname);
 			},
 		});
-	}, []);
+	}, [motionTier]);
 
 	useEscapeKey(handleClose, !!selected);
 	useScrollLock(!!selected);
@@ -34,6 +38,8 @@ const WorkSection = () => {
 
 	useGSAP(
 		() => {
+			if (motionTier === "minimal") return;
+			const isReduced = motionTier === "reduced";
 			const elements = gsap.utils.toArray(".work-reveal");
 
 			elements.forEach((el, i) => {
@@ -41,61 +47,68 @@ const WorkSection = () => {
 					scrollTrigger: {
 						trigger: el as HTMLElement,
 						start: "top 85%",
-						toggleActions: "play none none reverse",
+						toggleActions: "play none none none",
+						once: true,
 					},
-					y: 40,
+					y: isReduced ? 15 : 40,
 					opacity: 0,
-					duration: 0.8,
+					duration: isReduced ? 0.4 : 0.8,
 					ease: "power2.out",
-					delay: i * 0.1,
+					delay: isReduced ? i * 0.03 : i * 0.1,
 				});
 			});
 		},
-		{ scope: containerRef },
+		{ scope: containerRef, dependencies: [motionTier] },
 	);
 
 	// Animate modal in when selected changes
 	useGSAP(
 		() => {
 			if (selected) {
+				const isReduced = motionTier === "reduced";
+				const bgDur = isReduced ? 0.15 : 0.3;
+				const panelDur = isReduced ? 0.25 : 0.5;
+
 				gsap.fromTo(
 					".project-modal-bg",
 					{ opacity: 0 },
-					{ opacity: 1, duration: 0.3 },
+					{ opacity: 1, duration: bgDur },
 				);
 				gsap.fromTo(
 					".project-modal-panel",
 					{ x: "100%" },
-					{ x: 0, duration: 0.5, ease: "power3.out" },
+					{ x: 0, duration: panelDur, ease: "power3.out" },
 				);
 
-				// Trigger media reveal animations
-				setTimeout(() => {
-					const mediaElements = gsap.utils.toArray(".project-media-reveal");
-					mediaElements.forEach((el, i) => {
-						gsap.fromTo(
-							el as HTMLElement,
-							{ y: 40, opacity: 0 },
-							{
-								scrollTrigger: {
-									trigger: el as HTMLElement,
-									scroller: ".project-modal-panel", // use the modal panel as the scroller
-									start: "top 95%",
-									toggleActions: "play none none reverse",
+				if (motionTier !== "minimal") {
+					setTimeout(() => {
+						const mediaElements = gsap.utils.toArray(".project-media-reveal");
+						mediaElements.forEach((el, i) => {
+							gsap.fromTo(
+								el as HTMLElement,
+								{ y: isReduced ? 15 : 40, opacity: 0 },
+								{
+									scrollTrigger: {
+										trigger: el as HTMLElement,
+										scroller: ".project-modal-panel",
+										start: "top 95%",
+										toggleActions: "play none none none",
+										once: true,
+									},
+									y: 0,
+									opacity: 1,
+									duration: isReduced ? 0.4 : 0.8,
+									ease: "power2.out",
+									delay: isReduced ? i * 0.03 : i * 0.1,
 								},
-								y: 0,
-								opacity: 1,
-								duration: 0.8,
-								ease: "power2.out",
-								delay: i * 0.1,
-							},
-						);
-					});
-				}, 400); // slight delay to wait for panel slide
+							);
+						});
+					}, isReduced ? 150 : 400);
+				}
 			}
 		},
-		{ dependencies: [selected] },
-	); // Removed scope: containerRef because modal is portaled to document.body
+		{ dependencies: [selected, motionTier] },
+	);
 
 	const featured = projects.find((p) => p.featured);
 	const rest = projects.filter((p) => !p.featured);
@@ -107,14 +120,6 @@ const WorkSection = () => {
 				ref={containerRef}
 				className="relative min-h-screen px-6 py-32 md:px-12 lg:px-20 overflow-hidden"
 			>
-				{/* Ghost number */}
-				<div
-					className="section-ghost-number absolute right-4 top-8 md:right-12 z-0 opacity-50"
-					aria-hidden="true"
-				>
-					003
-				</div>
-
 				<h2 className="work-reveal relative z-10 font-display mb-16 text-[clamp(40px,6vw,80px)] text-foreground">
 					SELECTED WORK
 				</h2>

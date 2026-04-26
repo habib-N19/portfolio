@@ -8,7 +8,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 const config = defineConfig({
 	plugins: [
-		devtools(),
+		...(process.env.NODE_ENV === "development" ? [devtools()] : []),
 		paraglideVitePlugin({
 			project: "./project.inlang",
 			outdir: "./src/paraglide",
