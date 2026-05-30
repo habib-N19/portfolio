@@ -1,35 +1,52 @@
+/* eslint-disable react/no-unknown-property */
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { AdditiveBlending, type Points } from "three";
+
+function pseudoRandom(index: number, salt: number) {
+	const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+	return value - Math.floor(value);
+}
+
+function createParticleBuffers(
+	particleCount: number,
+	zScale: number,
+	zOffset: number,
+	minSpeed: number,
+	speedRange: number,
+) {
+	const positions = new Float32Array(particleCount * 3);
+	const basePositions = new Float32Array(particleCount * 3);
+	const speeds = new Float32Array(particleCount);
+
+	for (let i = 0; i < particleCount; i++) {
+		const x = (pseudoRandom(i, 1) - 0.5) * 20;
+		const y = (pseudoRandom(i, 2) - 0.5) * 20;
+		const z = (pseudoRandom(i, 3) - 0.5) * zScale + zOffset;
+
+		positions[i * 3] = x;
+		positions[i * 3 + 1] = y;
+		positions[i * 3 + 2] = z;
+
+		basePositions[i * 3] = x;
+		basePositions[i * 3 + 1] = y;
+		basePositions[i * 3 + 2] = z;
+
+		speeds[i] = pseudoRandom(i, 4) * speedRange + minSpeed;
+	}
+
+	return { positions, basePositions, speeds };
+}
 
 function BackgroundParticles() {
 	const particlesRef = useRef<Points>(null);
 	const elapsedRef = useRef(0);
 
 	// Generate dense, slow particles
-	const [positions, basePositions, speeds] = useMemo(() => {
-		const particleCount = 1800;
-		const pos = new Float32Array(particleCount * 3);
-		const basePos = new Float32Array(particleCount * 3);
-		const spd = new Float32Array(particleCount);
-
-		for (let i = 0; i < particleCount; i++) {
-			const x = (Math.random() - 0.5) * 20;
-			const y = (Math.random() - 0.5) * 20;
-			const z = (Math.random() - 0.5) * 10 - 2; // pushed back
-
-			pos[i * 3] = x;
-			pos[i * 3 + 1] = y;
-			pos[i * 3 + 2] = z;
-
-			basePos[i * 3] = x;
-			basePos[i * 3 + 1] = y;
-			basePos[i * 3 + 2] = z;
-
-			spd[i] = Math.random() * 0.15 + 0.05; // very slow
-		}
-		return [pos, basePos, spd];
-	}, []);
+	const { positions, basePositions, speeds } = useMemo(
+		() => createParticleBuffers(1800, 10, -2, 0.05, 0.15),
+		[],
+	);
 
 	useFrame((_, delta) => {
 		if (!particlesRef.current) return;
@@ -46,14 +63,9 @@ function BackgroundParticles() {
 			const idxZ = i * 3 + 2;
 
 			const speed = speeds[i];
-
-			let nextBaseY = basePositions[idxY] + speed * safeDelta;
-			let wrapped = false;
-			if (nextBaseY > 10) {
-				nextBaseY -= 20;
-				wrapped = true;
-			}
-			basePositions[idxY] = nextBaseY;
+			const startY = basePositions[idxY];
+			const driftY = ((startY + elapsedRef.current * speed + 10) % 20) - 10;
+			const wrapped = driftY < startY;
 
 			const currentX = positionsAttr.array[idxX] as number;
 			const currentY = positionsAttr.array[idxY] as number;
@@ -61,13 +73,12 @@ function BackgroundParticles() {
 
 			if (wrapped) {
 				positionsAttr.array[idxX] = basePositions[idxX];
-				positionsAttr.array[idxY] = nextBaseY;
+				positionsAttr.array[idxY] = driftY;
 				positionsAttr.array[idxZ] = basePositions[idxZ];
 			} else {
 				positionsAttr.array[idxX] =
 					currentX + (basePositions[idxX] - currentX) * lerpFactor;
-				positionsAttr.array[idxY] =
-					currentY + (nextBaseY - currentY) * lerpFactor;
+				positionsAttr.array[idxY] = currentY + (driftY - currentY) * lerpFactor;
 				positionsAttr.array[idxZ] =
 					currentZ + (basePositions[idxZ] - currentZ) * lerpFactor;
 			}
@@ -102,29 +113,10 @@ function ForegroundParticles() {
 	const elapsedRef = useRef(0);
 
 	// Generate sparse, fast, larger particles
-	const [positions, basePositions, speeds] = useMemo(() => {
-		const particleCount = 50; // Much fewer
-		const pos = new Float32Array(particleCount * 3);
-		const basePos = new Float32Array(particleCount * 3);
-		const spd = new Float32Array(particleCount);
-
-		for (let i = 0; i < particleCount; i++) {
-			const x = (Math.random() - 0.5) * 20;
-			const y = (Math.random() - 0.5) * 20;
-			const z = (Math.random() - 0.5) * 5 + 2; // closer to camera
-
-			pos[i * 3] = x;
-			pos[i * 3 + 1] = y;
-			pos[i * 3 + 2] = z;
-
-			basePos[i * 3] = x;
-			basePos[i * 3 + 1] = y;
-			basePos[i * 3 + 2] = z;
-
-			spd[i] = Math.random() * 0.4 + 0.2; // faster
-		}
-		return [pos, basePos, spd];
-	}, []);
+	const { positions, basePositions, speeds } = useMemo(
+		() => createParticleBuffers(50, 5, 2, 0.2, 0.4),
+		[],
+	);
 
 	useFrame((_, delta) => {
 		if (!particlesRef.current) return;
@@ -141,15 +133,9 @@ function ForegroundParticles() {
 			const idxZ = i * 3 + 2;
 
 			const speed = speeds[i];
-
-			// Background drift
-			let nextBaseY = basePositions[idxY] + speed * safeDelta;
-			let wrapped = false;
-			if (nextBaseY > 10) {
-				nextBaseY -= 20;
-				wrapped = true;
-			}
-			basePositions[idxY] = nextBaseY;
+			const startY = basePositions[idxY];
+			const driftY = ((startY + elapsedRef.current * speed + 10) % 20) - 10;
+			const wrapped = driftY < startY;
 
 			const currentX = positionsAttr.array[idxX] as number;
 			const currentY = positionsAttr.array[idxY] as number;
@@ -157,13 +143,12 @@ function ForegroundParticles() {
 
 			if (wrapped) {
 				positionsAttr.array[idxX] = basePositions[idxX];
-				positionsAttr.array[idxY] = nextBaseY;
+				positionsAttr.array[idxY] = driftY;
 				positionsAttr.array[idxZ] = basePositions[idxZ];
 			} else {
 				positionsAttr.array[idxX] =
 					currentX + (basePositions[idxX] - currentX) * lerpFactor;
-				positionsAttr.array[idxY] =
-					currentY + (nextBaseY - currentY) * lerpFactor;
+				positionsAttr.array[idxY] = currentY + (driftY - currentY) * lerpFactor;
 				positionsAttr.array[idxZ] =
 					currentZ + (basePositions[idxZ] - currentZ) * lerpFactor;
 			}

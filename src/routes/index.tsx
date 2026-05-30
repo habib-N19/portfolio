@@ -4,8 +4,8 @@ import {
 	Suspense,
 	useCallback,
 	useEffect,
+	useReducer,
 	useRef,
-	useState,
 } from "react";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 import FilmGrain from "#/components/portfolio/FilmGrain";
@@ -30,35 +30,71 @@ const ContactSection = lazy(
 	() => import("#/components/portfolio/ContactSection"),
 );
 
-export const Route = createFileRoute("/")({ component: PortfolioPage });
+export const Route = createFileRoute("/")({ component: IndexPage });
 
 const sections = ["hero", "about", "work", "blog", "contact"];
 
-export function PortfolioPage() {
-	const [showLoader, setShowLoader] = useState(false);
-	const [showWebGL, setShowWebGL] = useState(false);
-	const [activeSection, setActiveSection] = useState("hero");
+type PortfolioState = {
+	showLoader: boolean;
+	showWebGL: boolean;
+	activeSection: string;
+};
+
+type PortfolioAction =
+	| { type: "complete-loader" }
+	| { type: "enable-webgl" }
+	| { type: "set-active-section"; section: string };
+
+function portfolioReducer(
+	state: PortfolioState,
+	action: PortfolioAction,
+): PortfolioState {
+	switch (action.type) {
+		case "complete-loader":
+			if (!state.showLoader) return state;
+			return { ...state, showLoader: false };
+		case "enable-webgl":
+			if (state.showWebGL) return state;
+			return { ...state, showWebGL: true };
+		case "set-active-section":
+			if (state.activeSection === action.section) return state;
+			return { ...state, activeSection: action.section };
+		default:
+			return state;
+	}
+}
+
+function IndexPage() {
+	const [state, dispatch] = useReducer(portfolioReducer, undefined, () => {
+		if (typeof window === "undefined") {
+			return { showLoader: false, showWebGL: false, activeSection: "hero" };
+		}
+		const signals = getClientPerfSignals();
+		const visited = sessionStorage.getItem("portfolio-visited") === "true";
+		return {
+			showLoader: !visited && !signals.prefersReducedMotion,
+			showWebGL: false,
+			activeSection: "hero",
+		};
+	});
 	const observerRef = useRef<IntersectionObserver | null>(null);
 
 	const onLoadComplete = useCallback(() => {
-		setShowLoader(false);
+		dispatch({ type: "complete-loader" });
 	}, []);
 
 	useEffect(() => {
 		const signals = getClientPerfSignals();
-		const visited = sessionStorage.getItem("portfolio-visited") === "true";
-
-		if (!visited && !signals.prefersReducedMotion) {
-			setShowLoader(true);
-		}
 
 		if (!shouldEnableWebGLBackground(signals)) return;
 
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
 		if ("requestIdleCallback" in window) {
-			requestIdleCallback(() => setShowWebGL(true), { timeout: 1500 });
+			requestIdleCallback(() => dispatch({ type: "enable-webgl" }), {
+				timeout: 1500,
+			});
 		} else {
-			timeoutId = setTimeout(() => setShowWebGL(true), 800);
+			timeoutId = setTimeout(() => dispatch({ type: "enable-webgl" }), 800);
 		}
 
 		return () => {
@@ -82,9 +118,10 @@ export function PortfolioPage() {
 				}
 
 				if (mostVisibleSection) {
-					setActiveSection((prev) =>
-						prev === mostVisibleSection ? prev : mostVisibleSection,
-					);
+					dispatch({
+						type: "set-active-section",
+						section: mostVisibleSection,
+					});
 				}
 
 				maxIntersectionRatio = 0;
@@ -99,7 +136,7 @@ export function PortfolioPage() {
 
 		const handleScroll = () => {
 			if (window.scrollY < 100) {
-				setActiveSection((prev) => (prev === "hero" ? prev : "hero"));
+				dispatch({ type: "set-active-section", section: "hero" });
 			}
 		};
 		window.addEventListener("scroll", handleScroll, { passive: true });
@@ -114,7 +151,7 @@ export function PortfolioPage() {
 		<MotionProvider>
 			<SmoothScroll>
 				<div className="portfolio-theme">
-					{showWebGL && (
+					{state.showWebGL && (
 						<Suspense fallback={null}>
 							<WebGLBackground />
 						</Suspense>
@@ -122,7 +159,7 @@ export function PortfolioPage() {
 
 					<CustomCursor />
 					<Suspense fallback={null}>
-						<FloatingNav activeSection={activeSection} />
+						<FloatingNav activeSection={state.activeSection} />
 					</Suspense>
 					<FilmGrain />
 
@@ -152,7 +189,7 @@ export function PortfolioPage() {
 						</LazySection>
 					</main>
 
-					{showLoader && <Loader onComplete={onLoadComplete} />}
+					{state.showLoader && <Loader onComplete={onLoadComplete} />}
 				</div>
 			</SmoothScroll>
 		</MotionProvider>

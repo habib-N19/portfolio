@@ -138,20 +138,6 @@ const ContactSection = () => {
 						</span>
 					</a>
 
-					<a
-						href={identity.socials.readcv.url}
-						target="_blank"
-						rel="noopener noreferrer"
-						data-cursor="external"
-						className="group flex items-center gap-4 border-b border-surface-border pb-4 transition-colors hover:border-primary"
-					>
-						<span className="font-mono-data text-muted-foreground">
-							&#x2197;
-						</span>
-						<span className="font-mono-data text-foreground transition-colors group-hover:text-primary">
-							read.cv/{identity.socials.readcv.handle}
-						</span>
-					</a>
 				</div>
 			</div>
 

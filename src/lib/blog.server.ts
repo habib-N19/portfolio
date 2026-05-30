@@ -3,10 +3,11 @@ import path from "node:path";
 import matter from "gray-matter";
 import { Marked } from "marked";
 import readingTime from "reading-time";
+import { sanitizeBlogHtml } from "./sanitize-html";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export interface BlogPostMeta {
+interface BlogPostMeta {
 	slug: string;
 	title: string;
 	date: string;
@@ -103,7 +104,8 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 	}
 
 	const stats = readingTime(content);
-	const html = await marked.parse(content);
+	const rawHtml = await marked.parse(content);
+	const html = sanitizeBlogHtml(rawHtml);
 
 	return {
 		slug,

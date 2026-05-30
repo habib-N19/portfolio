@@ -1,4 +1,10 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 type LazySectionProps = {
 	id: string;
@@ -11,8 +17,14 @@ export function LazySection({
 	children,
 	rootMargin = "300px 0px",
 }: LazySectionProps) {
-	const [mounted, setMounted] = useState(false);
+	const [mounted, setMounted] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return !("IntersectionObserver" in window);
+	});
 	const ref = useRef<HTMLDivElement>(null);
+	const mount = useCallback(() => {
+		setMounted(true);
+	}, []);
 
 	useEffect(() => {
 		const el = ref.current;
@@ -20,15 +32,12 @@ export function LazySection({
 
 		let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-		if (!("IntersectionObserver" in window)) {
-			setMounted(true);
-			return;
-		}
+		if (!("IntersectionObserver" in window)) return;
 
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting) {
-					setMounted(true);
+					mount();
 					observer.disconnect();
 				}
 			},
@@ -37,21 +46,16 @@ export function LazySection({
 		observer.observe(el);
 
 		if ("requestIdleCallback" in window) {
-			(window as any).requestIdleCallback(
-				() => {
-					if (!mounted) setMounted(true);
-				},
-				{ timeout: 4000 },
-			);
+			window.requestIdleCallback(() => mount(), { timeout: 4000 });
 		} else {
-			idleTimer = setTimeout(() => setMounted(true), 3000);
+			idleTimer = setTimeout(() => mount(), 3000);
 		}
 
 		return () => {
 			observer.disconnect();
 			if (idleTimer) clearTimeout(idleTimer);
 		};
-	}, [rootMargin]);
+	}, [mount, rootMargin]);
 
 	return (
 		<div id={id} ref={ref}>

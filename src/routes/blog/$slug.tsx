@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import parse from "html-react-parser";
 import { useEffect, useRef } from "react";
 import CustomCursor from "#/components/portfolio/CustomCursor";
 import SmoothScroll from "#/components/portfolio/SmoothScroll";
@@ -151,8 +152,9 @@ function BlogPostRoute() {
               prose-td:border-surface-border prose-td:text-muted-foreground
               prose-img:border prose-img:border-surface-border prose-img:rounded-none
               prose-hr:border-surface-border"
-						dangerouslySetInnerHTML={{ __html: post.content }}
-					/>
+					>
+						{parse(post.content)}
+					</article>
 
 					{/* Footer nav */}
 					<nav className="mt-24 border-t border-surface-border pt-12 flex justify-between items-center">

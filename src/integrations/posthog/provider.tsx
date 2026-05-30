@@ -1,3 +1,4 @@
+import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { env } from "#/env";
@@ -29,8 +30,7 @@ export default function PostHogProvider({ children }: PostHogProviderProps) {
 
 		initialized.current = true;
 
-		const initPostHog = async () => {
-			const { default: posthog } = await import("posthog-js");
+		const initPostHog = () => {
 			posthog.init(safeKey, {
 				api_host: host,
 				person_profiles: "identified_only",
@@ -46,7 +46,7 @@ export default function PostHogProvider({ children }: PostHogProviderProps) {
 			// Fallback: defer by 3 seconds
 			setTimeout(() => initPostHog(), 3000);
 		}
-	}, [hasUsableKey, key, host]);
+	}, [hasUsableKey, host]);
 
 	// No PostHogProvider wrapper needed — posthog-js works globally once init'd
 	return <>{children}</>;

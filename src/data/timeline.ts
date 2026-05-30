@@ -1,45 +1,106 @@
+export type TimelineTag =
+	| "learning"
+	| "internship"
+	| "work"
+	| "building"
+	| "shipping";
+
 export interface TimelineNode {
-  year: number;
-  tag: string;
-  title: string;
-  description: string;
+	id: string;
+	startYear: number;
+	endYear?: number;
+	ongoing?: boolean;
+	tag: TimelineTag;
+	title: string;
+	company?: string;
+	description: string;
 }
 
 export const timelineData: TimelineNode[] = [
-  {
-    year: 2026,
-    tag: "LAUNCH",
-    title: "This portfolio, v1.0",
-    description: "You're looking at it. A creative statement disguised as a developer portfolio. Built with intention, shipped with conviction.",
-  },
-  {
-    year: 2024,
-    tag: "SHIPPED",
-    title: "Open source contributions",
-    description: "Published Mono CMS, contributed to 3 open source projects. Started writing technical blog posts about creative development.",
-  },
-  {
-    year: 2023,
-    tag: "WORK",
-    title: "First engineering role",
-    description: "Joined a product team as a frontend developer. Shipped features used by thousands. Learned what production-grade code actually means.",
-  },
-  {
-    year: 2022,
-    tag: "LEARNING",
-    title: "Deep dive into WebGL & shaders",
-    description: "Self-directed study: Three.js, GLSL shaders, shipped 4 experiments. None in production. All on GitHub.",
-  },
-  {
-    year: 2021,
-    tag: "PROJECT",
-    title: "First React app shipped",
-    description: "Built and deployed a task management app. Learned the hard way that state management is its own discipline.",
-  },
-  {
-    year: 2020,
-    tag: "EDUCATION",
-    title: "Started CS degree",
-    description: "Enrolled in Computer Science. First encounter with algorithms, data structures, and the beauty of computational thinking.",
-  },
+	{
+		id: "ph-web-dev",
+		startYear: 2023,
+		tag: "learning",
+		title: "Programming Hero — Web Development",
+		company: "Programming Hero",
+		description:
+			"First serious entry into software. HTML, CSS, JavaScript, Node, Express, MongoDB. Built and broke things until the basics felt obvious.",
+	},
+	{
+		id: "ph-next-level",
+		startYear: 2023,
+		endYear: 2024,
+		tag: "learning",
+		title: "Programming Hero — Next Level Web Development",
+		company: "Programming Hero",
+		description:
+			"TypeScript, proper MERN, Mongoose, Prisma, Docker, GraphQL, AWS basics, CI/CD. Where the toolkit I still use today was assembled.",
+	},
+	{
+		id: "ideapeel-internship",
+		startYear: 2023,
+		endYear: 2024,
+		tag: "internship",
+		title: "First professional role",
+		company: "Ideapeel",
+		description:
+			"Three months at a design agency. Built a Figma plugin and the first sketches of what would later become my Webflow apps line.",
+	},
+	{
+		id: "bluebix-bix3",
+		startYear: 2024,
+		endYear: 2025,
+		tag: "work",
+		title: "Full-stack on Bix3 recruitment marketplace",
+		company: "Bluebix",
+		description:
+			"First full-time job — night shift. Shipped on a React/Ant Design SPA over 200+ commits. Real production constraints for the first time.",
+	},
+	{
+		id: "phitron-dsa",
+		startYear: 2024,
+		endYear: 2025,
+		tag: "learning",
+		title: "Phitron — Data Structures & Algorithms",
+		company: "Phitron",
+		description:
+			"Days in DSA classes, nights at Bluebix. Closed the gap a self-taught engineer always feels about fundamentals.",
+	},
+	{
+		id: "softstandard",
+		startYear: 2025,
+		ongoing: true,
+		tag: "work",
+		title: "Full-stack on Leelu + Oppora",
+		company: "Softstandard Solutions",
+		description:
+			"Current role. Backend pipelines and frontend product surface on Leelu, an AI/agentic recruiting platform. Also shipping Oppora's landing.",
+	},
+	{
+		id: "phitron-ai-ml",
+		startYear: 2025,
+		ongoing: true,
+		tag: "learning",
+		title: "Phitron — AI / ML",
+		company: "Phitron",
+		description:
+			"Classical ML through to deployed models. Final project: a medical-insurance cost predictor served from Hugging Face Spaces.",
+	},
+	{
+		id: "own-products",
+		startYear: 2025,
+		ongoing: true,
+		tag: "building",
+		title: "RTEC Campus Platform + Webflow Apps monorepo",
+		description:
+			"Own product work in parallel with the day job. RTEC for a technical college campus. Four Webflow SaaS extensions sharing a Bun monorepo.",
+	},
+	{
+		id: "portfolio-2026",
+		startYear: 2026,
+		tag: "shipping",
+		title: "This portfolio",
+		description:
+			"You're looking at it. Built to actually represent the work — not as a frame, as the case study itself.",
+	},
 ];

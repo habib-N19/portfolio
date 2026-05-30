@@ -1,0 +1,29 @@
+{
+  "name": "habib-portfolio-remotion",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Remotion compositions for portfolio case-study hero videos.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "render:leelu": "remotion render Leelu ../public/project-videos/leelu.mp4",
+    "render:rtec": "remotion render Rtec ../public/project-videos/rtec.mp4",
+    "render:webflow-apps": "remotion render WebflowApps ../public/project-videos/webflow-apps.mp4",
+    "render:e-examination-pro": "remotion render EExaminationPro ../public/project-videos/e-examination-pro.mp4",
+    "render:researchflow": "remotion render Researchflow ../public/project-videos/researchflow.mp4"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.463",
+    "@remotion/cli": "4.0.463",
+    "@remotion/fonts": "4.0.463",
+    "@remotion/google-fonts": "4.0.463",
+    "@remotion/renderer": "4.0.463",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.463"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.0",
+    "typescript": "5.7.2"
+  }
+}

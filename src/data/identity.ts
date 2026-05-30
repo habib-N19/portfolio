@@ -17,7 +17,11 @@ export const identity = {
 	role: "FULL-STACK DEVELOPER",
 
 	tagline:
-		"I build web applications with React, TypeScript, and WebGL — focused on performance, accessibility, and interfaces worth interacting with.",
+		"Full-stack developer shipping AI-augmented products at Softstandard, building Webflow SaaS on the side, and running my own campus platform.",
+
+	/** One-line origin note for the about section — surfaces the non-linear path honestly. */
+	originNote:
+		"Trained as a textile engineer. Self-taught into software in 2023 through a deliberate curriculum (Programming Hero → Phitron) — shipping production code ever since.",
 
 	location: "Dhaka, Bangladesh",
 
@@ -37,26 +41,22 @@ export const identity = {
 			handle: "habib-n19",
 			url: "https://www.linkedin.com/in/habib-n19/",
 		},
-		readcv: {
-			handle: "yourhandle",
-			url: "https://read.cv/yourhandle",
-		},
 		email: "habiburnabiarafat@gmail.com",
 	},
 
 	/** Resume PDF path (served from /public) */
 	resumePath: "/resume.pdf",
 
-	/** Primary tech stack shown in hero / overview areas */
+	/** Primary tech stack shown in hero / overview areas — reflects actual day-to-day work. */
 	techStack: [
-		"React",
 		"TypeScript",
+		"React",
+		"Next.js",
 		"Node.js",
-		"WebGL",
-		"Three.js",
-		"GSAP",
+		"Express",
+		"MongoDB",
 		"PostgreSQL",
-		"TanStack",
+		"Prisma",
 	],
 
 	/** Site metadata */
@@ -65,5 +65,3 @@ export const identity = {
 		url: "https://hn-arafat.dev",
 	},
 } as const;
-
-export type Identity = typeof identity;

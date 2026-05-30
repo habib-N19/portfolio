@@ -2,7 +2,7 @@ import { useGSAP } from "@gsap/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { identity } from "#/data/identity";
-import { type Project, projects } from "#/data/projects";
+import { type Project, type ProjectSection, projects } from "#/data/projects";
 import { useEscapeKey } from "#/hooks/useEscapeKey";
 import { useScrollLock } from "#/hooks/useScrollLock";
 import { gsap } from "#/lib/gsap-setup";
@@ -25,8 +25,71 @@ import { SplitText } from "./SplitText";
  */
 
 const featuredProjects = projects
-	.filter((p) => p.media && p.media.length > 0)
+	.filter((p) => p.tier === "featured")
 	.slice(0, 3);
+
+function HeroCaseStudySection({
+	label,
+	section,
+}: {
+	label: string;
+	section: ProjectSection;
+}) {
+	const hasIntro = !!section.intro;
+	const groups = section.groups ?? [];
+	const hasGroups = groups.length > 0;
+	if (!hasIntro && !hasGroups) return null;
+	const multiGroup = groups.length > 1;
+	return (
+		<div>
+			<span className="font-mono-label mb-3 block text-primary">{label}</span>
+			{section.intro && (
+				<p className="font-editorial text-base leading-relaxed text-foreground">
+					{section.intro}
+				</p>
+			)}
+			{hasGroups && (
+				<div
+					className={
+						multiGroup ? "mt-5 grid gap-x-8 gap-y-5 md:grid-cols-2" : "mt-5"
+					}
+				>
+					{groups.map((group, idx) => (
+						<div key={group.label ?? `g-${idx}`}>
+							{group.label && (
+								<span className="font-mono-label mb-2 block text-[10px] text-text-secondary">
+									{group.label}
+								</span>
+							)}
+							<ul
+								className={
+									multiGroup
+										? "space-y-1.5"
+										: "grid gap-x-6 gap-y-1.5 md:grid-cols-2"
+								}
+							>
+								{group.items.map((item) => (
+									<li
+										key={item}
+										className="font-editorial text-sm leading-relaxed text-foreground flex gap-2"
+									>
+										<span
+											aria-hidden="true"
+											className="font-mono-data text-primary select-none pt-[3px] text-[10px]"
+										>
+											&mdash;
+										</span>
+										<span>{item}</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
 
 const HeroVariantB = () => {
 	const motionTier = useMotionTier();
@@ -40,7 +103,6 @@ const HeroVariantB = () => {
 
 	const activeProject = featuredProjects[activeProjectIdx] || projects[0];
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: animation should re-run on project changes
 	useEffect(() => {
 		const scrollHandler = () => {
 			if (window.scrollY > 50) setShowScroll(false);
@@ -73,14 +135,21 @@ const HeroVariantB = () => {
 	useEffect(() => {
 		if (motionTier === "minimal") return;
 		const timeoutMs = motionTier === "reduced" ? 80 : 180;
+		const imageSelector = `.hero-project-image[data-project-idx="${activeProjectIdx}"]`;
+		const infoSelector = `.hero-project-info[data-project-idx="${activeProjectIdx}"]`;
 		const timeoutId = setTimeout(() => {
 			gsap.fromTo(
-				".hero-project-image",
+				imageSelector,
 				{ opacity: 0, scale: 1.05 },
-				{ opacity: 1, scale: 1, duration: motionTier === "reduced" ? 0.3 : 0.6, ease: "power2.out" },
+				{
+					opacity: 1,
+					scale: 1,
+					duration: motionTier === "reduced" ? 0.3 : 0.6,
+					ease: "power2.out",
+				},
 			);
 			gsap.fromTo(
-				".hero-project-info",
+				infoSelector,
 				{ y: 10, opacity: 0 },
 				{
 					y: 0,
@@ -95,7 +164,7 @@ const HeroVariantB = () => {
 		return () => {
 			clearTimeout(timeoutId);
 		};
-	}, [activeProjectIdx, motionTier]);
+	}, [motionTier, activeProjectIdx]);
 
 	useEffect(() => {
 		return () => {
@@ -137,7 +206,6 @@ const HeroVariantB = () => {
 	useEscapeKey(closeProject, !!selectedProject);
 	useScrollLock(!!selectedProject);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: animate on selectedProject change
 	useEffect(() => {
 		if (selectedProject) {
 			const isReduced = motionTier === "reduced";
@@ -159,29 +227,34 @@ const HeroVariantB = () => {
 				if (modalMediaDelayRef.current) {
 					clearTimeout(modalMediaDelayRef.current);
 				}
-				modalMediaDelayRef.current = setTimeout(() => {
-					const mediaElements = gsap.utils.toArray(".hero-project-media-reveal");
-					for (const [i, el] of mediaElements.entries()) {
-						gsap.fromTo(
-							el as HTMLElement,
-							{ y: isReduced ? 15 : 40, opacity: 0 },
-							{
-								scrollTrigger: {
-									trigger: el as HTMLElement,
-									scroller: ".hero-modal-panel",
-									start: "top 95%",
-									toggleActions: "play none none reverse",
-								},
-								y: 0,
-								opacity: 1,
-								duration: isReduced ? 0.4 : 0.8,
-								ease: "power2.out",
-								delay: isReduced ? i * 0.03 : i * 0.1,
-							},
+				modalMediaDelayRef.current = setTimeout(
+					() => {
+						const mediaElements = gsap.utils.toArray(
+							".hero-project-media-reveal",
 						);
-					}
-					modalMediaDelayRef.current = null;
-				}, isReduced ? 150 : 400);
+						for (const [i, el] of mediaElements.entries()) {
+							gsap.fromTo(
+								el as HTMLElement,
+								{ y: isReduced ? 15 : 40, opacity: 0 },
+								{
+									scrollTrigger: {
+										trigger: el as HTMLElement,
+										scroller: ".hero-modal-panel",
+										start: "top 95%",
+										toggleActions: "play none none reverse",
+									},
+									y: 0,
+									opacity: 1,
+									duration: isReduced ? 0.4 : 0.8,
+									ease: "power2.out",
+									delay: isReduced ? i * 0.03 : i * 0.1,
+								},
+							);
+						}
+						modalMediaDelayRef.current = null;
+					},
+					isReduced ? 150 : 400,
+				);
 			}
 		}
 
@@ -303,7 +376,7 @@ const HeroVariantB = () => {
 									<span
 										className="accent-dot"
 										style={{
-											animation: "pulse-glow 2s ease-in-out infinite",
+											animation: "pulse-glow 900ms ease-in-out infinite",
 										}}
 									/>
 									<span className="font-mono-label text-primary">
@@ -410,11 +483,35 @@ const HeroVariantB = () => {
 							className="block w-full text-left border border-surface-border bg-background/30 backdrop-blur-sm project-card-hover transition-all duration-300 hover:border-primary/30"
 						>
 							{/* Project image */}
-							<div className="hero-project-image aspect-[16/10] w-full overflow-hidden border-b border-surface-border">
-								{activeProject.media && activeProject.media[0] ? (
+							<div
+								className="hero-project-image aspect-[16/10] w-full overflow-hidden border-b border-surface-border"
+								data-project-idx={activeProjectIdx}
+							>
+								{activeProject.heroMedia?.type === "video" ? (
+									<video
+										src={activeProject.heroMedia.url}
+										autoPlay
+										muted
+										loop
+										playsInline
+										className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+									/>
+								) : activeProject.heroMedia?.type === "image" ? (
+									<img
+										src={activeProject.heroMedia.url}
+										alt={activeProject.title}
+										width={960}
+										height={600}
+										fetchPriority="high"
+										className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+									/>
+								) : activeProject.media?.[0] ? (
 									<img
 										src={buildUnsplashUrl(activeProject.media[0].url, 960)}
-										srcSet={buildUnsplashSrcSet(activeProject.media[0].url, [480, 720, 960, 1280])}
+										srcSet={buildUnsplashSrcSet(
+											activeProject.media[0].url,
+											[480, 720, 960, 1280],
+										)}
 										sizes="(max-width: 640px) 100vw, (max-width: 1200px) 70vw, 960px"
 										alt={activeProject.media[0].caption || activeProject.title}
 										width={960}
@@ -435,12 +532,15 @@ const HeroVariantB = () => {
 							</div>
 
 							{/* Project info */}
-							<div className="hero-project-info p-5 md:p-6">
+							<div
+								className="hero-project-info p-5 md:p-6"
+								data-project-idx={activeProjectIdx}
+							>
 								<div className="flex items-start justify-between gap-4">
 									<div className="min-w-0">
-						<span className="font-mono-label text-muted-foreground">
-							[{activeProject.number}] &mdash; {activeProject.role}
-						</span>
+										<span className="font-mono-label text-muted-foreground">
+											[{activeProject.number}] &mdash; {activeProject.role}
+										</span>
 										<h2 className="font-display mt-1 text-[clamp(24px,3vw,40px)] leading-[0.95] text-foreground">
 											{activeProject.title}
 										</h2>
@@ -458,8 +558,8 @@ const HeroVariantB = () => {
 									{activeProject.tags.slice(0, 4).map((tag) => (
 										<span
 											key={tag}
-										className="font-mono-data border border-surface-border px-2 py-0.5 text-[11px] text-muted-foreground"
-									>
+											className="font-mono-data border border-surface-border px-2 py-0.5 text-[11px] text-muted-foreground"
+										>
 											{tag}
 										</span>
 									))}
@@ -578,31 +678,23 @@ const HeroVariantB = () => {
 								{selectedProject.title}
 							</h2>
 
-							<div className="mt-12 grid gap-12 md:grid-cols-3">
+							<div className="mt-12 space-y-8 max-w-4xl">
 								<div>
 									<span className="font-mono-label mb-3 block text-primary">
 										PROBLEM
 									</span>
-									<p className="font-editorial text-sm text-foreground">
+									<p className="font-editorial text-base leading-relaxed text-foreground max-w-2xl">
 										{selectedProject.problem}
 									</p>
 								</div>
-								<div>
-									<span className="font-mono-label mb-3 block text-primary">
-										APPROACH
-									</span>
-									<p className="font-editorial text-sm text-foreground">
-										{selectedProject.approach}
-									</p>
-								</div>
-								<div>
-									<span className="font-mono-label mb-3 block text-primary">
-										OUTCOME
-									</span>
-									<p className="font-editorial text-sm text-foreground">
-										{selectedProject.outcome}
-									</p>
-								</div>
+								<HeroCaseStudySection
+									label="APPROACH"
+									section={selectedProject.approach}
+								/>
+								<HeroCaseStudySection
+									label="OUTCOME"
+									section={selectedProject.outcome}
+								/>
 							</div>
 
 							<div className="mt-12">
@@ -646,6 +738,28 @@ const HeroVariantB = () => {
 								)}
 							</div>
 
+							{/* Hero media (video/image) */}
+							{selectedProject.heroMedia && (
+								<div className="mt-16 border border-surface-border overflow-hidden">
+									{selectedProject.heroMedia.type === "video" ? (
+										<video
+											src={selectedProject.heroMedia.url}
+											autoPlay
+											muted
+											loop
+											playsInline
+											className="h-auto w-full object-cover"
+										/>
+									) : (
+										<img
+											src={selectedProject.heroMedia.url}
+											alt={`${selectedProject.title} hero`}
+											className="h-auto w-full object-cover"
+										/>
+									)}
+								</div>
+							)}
+
 							{/* Media Gallery */}
 							{selectedProject.media && selectedProject.media.length > 0 && (
 								<div className="mt-20 border-t border-surface-border pt-12">
@@ -661,7 +775,10 @@ const HeroVariantB = () => {
 												{item.type === "image" ? (
 													<img
 														src={buildUnsplashUrl(item.url, 960)}
-														srcSet={buildUnsplashSrcSet(item.url, [480, 720, 960, 1280])}
+														srcSet={buildUnsplashSrcSet(
+															item.url,
+															[480, 720, 960, 1280],
+														)}
 														sizes="(max-width: 640px) 100vw, (max-width: 1200px) 70vw, 960px"
 														alt={
 															item.caption || `${selectedProject.title} media`

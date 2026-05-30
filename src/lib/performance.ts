@@ -1,8 +1,14 @@
-export type PerfSignals = {
+type PerfSignals = {
 	isMobile: boolean;
 	prefersReducedMotion: boolean;
 	saveData: boolean;
 	lowPowerDevice: boolean;
+};
+
+type NavigatorWithConnection = Navigator & {
+	connection?: {
+		saveData?: boolean;
+	};
 };
 
 export type MotionTier = "full" | "reduced" | "minimal";
@@ -40,7 +46,8 @@ export function getClientPerfSignals(): PerfSignals {
 	const prefersReducedMotion = window.matchMedia(
 		"(prefers-reduced-motion: reduce)",
 	).matches;
-	const saveData = (navigator as any).connection?.saveData === true;
+	const saveData =
+		(navigator as NavigatorWithConnection).connection?.saveData === true;
 	const cores = navigator.hardwareConcurrency || 8;
 	const lowPowerDevice = cores <= 4;
 
